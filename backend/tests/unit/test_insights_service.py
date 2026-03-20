@@ -116,16 +116,16 @@ class TestCheckConsent:
         self, insights_service, mock_insights_repo, user_id
     ):
         mock_insights_repo.get_consent.return_value = True
-        result = await insights_service.check_consent(user_id)
-        assert result is True
+        has_consent, _, _, _ = await insights_service.check_consent(user_id)
+        assert has_consent is True
         mock_insights_repo.get_consent.assert_called_once_with(user_id)
 
     async def test_returns_false_when_user_has_no_consent(
         self, insights_service, mock_insights_repo, user_id
     ):
         mock_insights_repo.get_consent.return_value = False
-        result = await insights_service.check_consent(user_id)
-        assert result is False
+        has_consent, _, _, _ = await insights_service.check_consent(user_id)
+        assert has_consent is False
 
 
 class TestGiveConsent:
@@ -221,7 +221,6 @@ class TestValidateRequest:
             message_count,
             exceeds_limit,
             estimated_tokens,
-            max_messages,
             suggested_filters,
         ) = await insights_service.validate_request(
             user_id,
@@ -247,7 +246,6 @@ class TestValidateRequest:
             message_count,
             exceeds_limit,
             _,
-            max_messages,
             suggested_filters,
         ) = await insights_service.validate_request(
             user_id,
@@ -259,16 +257,16 @@ class TestValidateRequest:
         assert valid is False
         assert message_count == MOCK_MAX_MESSAGES + 1
         assert exceeds_limit is True
-        assert max_messages == MOCK_MAX_MESSAGES
         assert suggested_filters is not None
         assert "suggestion" in suggested_filters
+        assert suggested_filters["max_allowed"] == MOCK_MAX_MESSAGES
 
     async def test_returns_invalid_when_no_messages_found(
         self, insights_service, mock_message_repo, user_id
     ):
         mock_message_repo.get_messages_for_insights.return_value = []
 
-        valid, message_count, exceeds_limit, _, _, _ = await insights_service.validate_request(
+        valid, message_count, exceeds_limit, _, _ = await insights_service.validate_request(
             user_id,
             [1, 2, 3],
             datetime.now(UTC) - timedelta(days=7),
@@ -283,7 +281,7 @@ class TestValidateRequest:
         messages = [MagicMock(id=uuid4()) for _ in range(250)]
         mock_message_repo.get_messages_for_insights.return_value = messages
 
-        _, _, _, estimated_tokens, _, _ = await insights_service.validate_request(
+        _, _, _, estimated_tokens, _ = await insights_service.validate_request(
             user_id, [1], datetime.now(UTC) - timedelta(days=7), datetime.now(UTC)
         )
 

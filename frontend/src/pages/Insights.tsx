@@ -202,7 +202,7 @@ export function Insights() {
   // Handle "Generate First Insight" from empty history
   const handleGenerateFirst = useCallback(() => {
     setActiveTab('generate')
-  }, [])
+  }, [setActiveTab])
 
   // After generation completes, refresh history and optionally switch tab
   const handleGenerationComplete = useCallback(() => {

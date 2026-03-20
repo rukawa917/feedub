@@ -79,12 +79,13 @@ def _log_after_retry(retry_state: RetryCallState) -> None:
         # Check if we're at max attempts or max delay
         at_max_attempts = retry_state.attempt_number >= MAX_ATTEMPTS
 
-        if at_max_attempts or retry_state.seconds_since_start >= MAX_DELAY_SECONDS:
+        elapsed = retry_state.seconds_since_start or 0
+        if at_max_attempts or elapsed >= MAX_DELAY_SECONDS:
             logger.error(
                 "[RETRY EXHAUSTED] %s - attempts=%d, elapsed=%.2fs, final_error=%s: %s",
                 func_name,
                 retry_state.attempt_number,
-                retry_state.seconds_since_start,
+                elapsed,
                 type(exception).__name__ if exception else "None",
                 str(exception)[:500] if exception else "None",
             )

@@ -176,9 +176,10 @@ class MessageService:
             # Log deduplication metrics
             messages_count = total_inserted
             duplicates_skipped = total_fetched - messages_count
-            dedup_percentage = (
-                (duplicates_skipped / total_fetched * 100) if total_fetched > 0 else 0
-            )
+            if total_fetched > 0:
+                dedup_percentage = duplicates_skipped / total_fetched * 100  # ty: ignore[division-by-zero]
+            else:
+                dedup_percentage = 0.0
 
             logger.info(f"Fetched {total_fetched} messages from Telegram for user {user_id}")
             if total_fetched > 0:

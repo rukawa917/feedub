@@ -8,7 +8,7 @@ from datetime import UTC, datetime, timedelta
 from unittest.mock import patch
 
 import pytest
-from jwt.exceptions import PyJWTError as JWTError
+from jwt.exceptions import PyJWTError as JWTError  # ty: ignore[unresolved-import]
 
 from src.core.security import (
     create_access_token,

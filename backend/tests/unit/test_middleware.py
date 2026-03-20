@@ -141,7 +141,7 @@ class TestTokenRefreshMiddleware:
         self, mock_create_token, mock_verify_token, app_with_middleware
     ):
         """Test that no X-Refreshed-Token is added when token validation fails."""
-        from jwt.exceptions import PyJWTError
+        from jwt.exceptions import PyJWTError  # ty: ignore[unresolved-import]
 
         mock_verify_token.side_effect = PyJWTError("Token expired")
 

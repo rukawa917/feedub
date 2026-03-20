@@ -9,7 +9,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import jwt
-from jwt.exceptions import PyJWTError as JWTError
+from jwt.exceptions import PyJWTError as JWTError  # ty: ignore[unresolved-import]
 
 from src.core.config import get_settings
 
@@ -34,10 +34,10 @@ def create_access_token(data: dict[str, Any], expires_delta: timedelta | None = 
         expire = datetime.now(UTC) + timedelta(hours=settings.jwt_expiration_hours)
 
     to_encode.update({"exp": expire})
-    encoded_jwt: str = jwt.encode(
+    encoded_jwt = jwt.encode(
         to_encode, settings.jwt_secret_key, algorithm=settings.jwt_algorithm
     )
-    return encoded_jwt
+    return encoded_jwt  # ty: ignore[invalid-return-type]  # PyJWT>=2.0 returns str
 
 
 def verify_access_token(token: str) -> dict[str, Any]:

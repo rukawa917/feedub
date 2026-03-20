@@ -171,10 +171,10 @@ async def database_health_check(
         engine = get_async_engine()
         pool = engine.pool
         pool_stats = ConnectionPoolStats(
-            pool_size=pool.size(),
-            checked_out=pool.checkedout(),
-            overflow=pool.overflow(),
-            checked_in=pool.checkedin(),
+            pool_size=pool.size(),  # ty: ignore[unresolved-attribute]
+            checked_out=pool.checkedout(),  # ty: ignore[unresolved-attribute]
+            overflow=pool.overflow(),  # ty: ignore[unresolved-attribute]
+            checked_in=pool.checkedin(),  # ty: ignore[unresolved-attribute]
         )
 
         return DatabaseDetailedHealth(
@@ -189,10 +189,10 @@ async def database_health_check(
             engine = get_async_engine()
             pool = engine.pool
             pool_stats = ConnectionPoolStats(
-                pool_size=pool.size(),
-                checked_out=pool.checkedout(),
-                overflow=pool.overflow(),
-                checked_in=pool.checkedin(),
+                pool_size=pool.size(),  # ty: ignore[unresolved-attribute]
+                checked_out=pool.checkedout(),  # ty: ignore[unresolved-attribute]
+                overflow=pool.overflow(),  # ty: ignore[unresolved-attribute]
+                checked_in=pool.checkedin(),  # ty: ignore[unresolved-attribute]
             )
         except Exception:
             pool_stats = ConnectionPoolStats(

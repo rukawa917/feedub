@@ -152,23 +152,25 @@ function preprocessNumberedLists(content: string): string {
  * - Manual numbered lists converted to proper markdown
  */
 export function MessageContent({ content, className }: MessageContentProps) {
-  if (!content) {
-    return <span className="text-foreground-muted italic">No text content</span>
-  }
-
   // Preprocess content to convert manual numbering to proper markdown
-  const processedContent = preprocessNumberedLists(content)
+  const processedContent = content ? preprocessNumberedLists(content) : ''
 
   // Sanitize HTML before rendering to prevent XSS from Telegram message content
   const sanitizedContent = useMemo(
     () =>
-      DOMPurify.sanitize(processedContent, {
-        ALLOWED_TAGS: ALLOWED_ELEMENTS,
-        ALLOWED_ATTR: ['class', 'href', 'target', 'rel', 'dir'],
-        ALLOW_DATA_ATTR: false,
-      }),
+      processedContent
+        ? DOMPurify.sanitize(processedContent, {
+            ALLOWED_TAGS: ALLOWED_ELEMENTS,
+            ALLOWED_ATTR: ['class', 'href', 'target', 'rel', 'dir'],
+            ALLOW_DATA_ATTR: false,
+          })
+        : '',
     [processedContent]
   )
+
+  if (!content) {
+    return <span className="text-foreground-muted italic">No text content</span>
+  }
 
   return (
     <div className={className} dir={detectTextDirection(content)}>

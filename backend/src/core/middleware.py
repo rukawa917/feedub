@@ -6,7 +6,7 @@ This module provides custom middleware for the application.
 
 import logging
 
-from jwt.exceptions import PyJWTError as JWTError
+from jwt.exceptions import PyJWTError as JWTError  # ty: ignore[unresolved-import]
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
