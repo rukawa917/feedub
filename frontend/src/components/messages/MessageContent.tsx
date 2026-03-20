@@ -1,3 +1,5 @@
+import DOMPurify from 'dompurify'
+import { useMemo } from 'react'
 import ReactMarkdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import { detectTextDirection } from '../../utils/text-direction'
@@ -157,6 +159,17 @@ export function MessageContent({ content, className }: MessageContentProps) {
   // Preprocess content to convert manual numbering to proper markdown
   const processedContent = preprocessNumberedLists(content)
 
+  // Sanitize HTML before rendering to prevent XSS from Telegram message content
+  const sanitizedContent = useMemo(
+    () =>
+      DOMPurify.sanitize(processedContent, {
+        ALLOWED_TAGS: ALLOWED_ELEMENTS,
+        ALLOWED_ATTR: ['class', 'href', 'target', 'rel', 'dir'],
+        ALLOW_DATA_ATTR: false,
+      }),
+    [processedContent]
+  )
+
   return (
     <div className={className} dir={detectTextDirection(content)}>
       <ReactMarkdown
@@ -254,7 +267,7 @@ export function MessageContent({ content, className }: MessageContentProps) {
           ),
         }}
       >
-        {processedContent}
+        {sanitizedContent}
       </ReactMarkdown>
     </div>
   )
