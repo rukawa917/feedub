@@ -1,5 +1,4 @@
 import os
-import signal
 
 from rich.console import Console
 

@@ -9,7 +9,9 @@ from feedub.utils import console, error, success
 
 
 def upgrade(
-    check: bool = typer.Option(False, "--check", help="Check for updates without applying them"),
+    check: bool = typer.Option(
+        False, "--check", help="Check for updates without applying them"
+    ),
 ) -> None:
     """Upgrade feedub to the latest version."""
 

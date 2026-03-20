@@ -31,6 +31,7 @@ from src.schemas.insights import (
     ConsentStatusResponse,
     GenerateInsightFromIdsRequest,
     GenerateInsightRequest,
+    GiveConsentRequest,
     GiveConsentResponse,
     InsightDetail,
     InsightListResponse,
@@ -104,13 +105,18 @@ async def get_consent_status(
     """
     logger.info(f"[INSIGHTS] GET /insights/consent/status - user_id={current_user.id}")
 
-    has_consent = await service.check_consent(current_user.id)
+    (
+        has_consent,
+        consent_version,
+        current_version,
+        requires_re_consent,
+    ) = await service.check_consent(current_user.id)
 
     return ConsentStatusResponse(
         has_consent=has_consent,
-        consent_version=None,
-        current_version="1.0",
-        requires_re_consent=False,
+        consent_version=consent_version,
+        current_version=current_version,
+        requires_re_consent=requires_re_consent,
     )
 
 
@@ -122,12 +128,14 @@ async def get_consent_status(
     description="Record user's consent for LLM processing of messages",
 )
 async def give_consent(
+    request: GiveConsentRequest,
     current_user: User = Depends(get_current_user),  # noqa: B008
     service: InsightsService = Depends(get_insights_service),  # noqa: B008
 ) -> GiveConsentResponse:
     """Give consent for LLM processing.
 
     Args:
+        request: Consent request with version to accept.
         current_user: Authenticated user from token.
         service: InsightsService instance.
 
@@ -140,7 +148,7 @@ async def give_consent(
 
     return GiveConsentResponse(
         success=True,
-        consent_version="1.0",
+        consent_version=request.version,
     )
 
 
@@ -166,11 +174,17 @@ async def revoke_consent(
     """
     logger.info(f"[INSIGHTS] POST /insights/consent/revoke - user_id={current_user.id}")
 
-    await service.revoke_consent(current_user.id)
+    revoked_at = await service.revoke_consent(current_user.id)
+
+    if revoked_at is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No active consent found to revoke",
+        )
 
     return RevokeConsentResponse(
         success=True,
-        revoked_at=None,
+        revoked_at=revoked_at,
     )
 
 
@@ -258,7 +272,6 @@ async def validate_insight_request(
         message_count,
         exceeds_limit,
         estimated_tokens,
-        max_messages,
         suggested_filters,
     ) = await service.validate_request(
         user_id=current_user.id,
@@ -272,7 +285,6 @@ async def validate_insight_request(
         message_count=message_count,
         exceeds_limit=exceeds_limit,
         estimated_tokens=estimated_tokens,
-        max_messages=max_messages,
         suggested_filters=suggested_filters,
     )
 
@@ -397,7 +409,8 @@ def _streaming_insight_response(
             yield _format_sse_event({"type": "status", "status": "pending"})
 
             # Check consent
-            if not await service.check_consent(user_id):
+            has_consent, _, _, _ = await service.check_consent(user_id)
+            if not has_consent:
                 yield _format_sse_event(
                     {
                         "type": "error",
@@ -486,7 +499,11 @@ def _streaming_insight_response(
         except Exception as e:
             logger.exception(f"[INSIGHTS] Streaming error: {e}")
             yield _format_sse_event(
-                {"type": "error", "error": "generation_failed", "detail": "An unexpected error occurred. Please try again."}
+                {
+                    "type": "error",
+                    "error": "generation_failed",
+                    "detail": "An unexpected error occurred. Please try again.",
+                }
             )
 
     return StreamingResponse(

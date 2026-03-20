@@ -5,8 +5,15 @@ import typer
 from rich.panel import Panel
 from rich.prompt import Confirm, Prompt
 
-from feedub.config import load_config, save_config
-from feedub.constants import BACKUP_DIR, CONFIG_FILE, DATA_DIR, DB_FILE, FEEDUB_HOME, LOG_DIR, PID_DIR
+from feedub.config import save_config
+from feedub.constants import (
+    BACKUP_DIR,
+    DATA_DIR,
+    DB_FILE,
+    FEEDUB_HOME,
+    LOG_DIR,
+    PID_DIR,
+)
 from feedub.utils import console, error, info, success, warning
 
 app = typer.Typer()
@@ -40,10 +47,12 @@ LLM_ENABLED=false
 def init() -> None:
     """Set up Feedub: detect project root, generate .env config."""
     console.print()
-    console.print(Panel.fit(
-        "[bold cyan]Welcome to Feedub![/bold cyan]",
-        border_style="cyan",
-    ))
+    console.print(
+        Panel.fit(
+            "[bold cyan]Welcome to Feedub![/bold cyan]",
+            border_style="cyan",
+        )
+    )
     console.print()
 
     env_path = FEEDUB_HOME / ".env"
@@ -93,10 +102,12 @@ def init() -> None:
     console.print()
     success(f"Config written to [bold]{env_path}[/bold]")
     console.print()
-    console.print(Panel.fit(
-        "[bold]Next steps:[/bold]\n"
-        f"  1. Edit [cyan]{env_path}[/cyan] — add your Telegram API credentials\n"
-        "  2. Run [green]feedub run[/green]",
-        border_style="dim",
-    ))
+    console.print(
+        Panel.fit(
+            "[bold]Next steps:[/bold]\n"
+            f"  1. Edit [cyan]{env_path}[/cyan] — add your Telegram API credentials\n"
+            "  2. Run [green]feedub run[/green]",
+            border_style="dim",
+        )
+    )
     console.print()

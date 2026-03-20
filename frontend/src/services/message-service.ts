@@ -205,7 +205,6 @@ export async function getMessages(
         ) {
           throw error
         }
-
       },
     }
   )

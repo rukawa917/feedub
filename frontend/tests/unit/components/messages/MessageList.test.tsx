@@ -328,10 +328,9 @@ describe('MessageList', () => {
 
       render(<MessageList messages={[specialMessage]} />)
 
-      // Should sanitize HTML by removing script tags entirely
-      // The text "alert("XSS")" should be rendered as plain text
-      expect(screen.getByText(/alert\("XSS"\)/)).toBeInTheDocument()
-      // Script tag should NOT be in the document
+      // DOMPurify removes <script> tags and their content entirely for security.
+      // Neither the script tag nor its inner text should appear in the DOM.
+      expect(screen.queryByText(/alert\("XSS"\)/)).not.toBeInTheDocument()
       expect(screen.queryByText(/<script>/)).not.toBeInTheDocument()
     })
 

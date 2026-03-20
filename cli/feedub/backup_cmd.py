@@ -12,7 +12,10 @@ from feedub.utils import console, error, success
 
 def backup(
     output: str = typer.Option(
-        None, "--output", "-o", help="Custom output path (default: ~/.feedub/backups/feedub-<timestamp>.db)"
+        None,
+        "--output",
+        "-o",
+        help="Custom output path (default: ~/.feedub/backups/feedub-<timestamp>.db)",
     ),
 ) -> None:
     """Create a database backup in ~/.feedub/backups/."""

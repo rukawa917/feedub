@@ -15,6 +15,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _config_logger = logging.getLogger(__name__)
 
+
 def _find_repo_root() -> Path:
     """Walk up from this file to find the repo root (directory containing .git)."""
     current = Path(__file__).resolve().parent

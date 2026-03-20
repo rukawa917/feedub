@@ -1,14 +1,24 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import React from 'react'
 import { useFetchStatus } from '../../../src/hooks/useFetchStatus'
 import { useAuthStore } from '../../../src/stores/auth'
 
-// Mock auth store - only getState is needed since hook doesn't use selector pattern
-vi.mock('../../../src/stores/auth', () => ({
-  useAuthStore: {
-    getState: vi.fn(),
-  },
-}))
+function createWrapper() {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  })
+  return ({ children }: { children: React.ReactNode }) =>
+    React.createElement(QueryClientProvider, { client: queryClient }, children)
+}
+
+// Mock auth store - hook uses useAuthStore((s) => s.token) selector pattern
+vi.mock('../../../src/stores/auth', () => {
+  const mockFn = vi.fn()
+  mockFn.getState = vi.fn()
+  return { useAuthStore: mockFn }
+})
 
 // Mock fetch globally
 const mockFetch = vi.fn()
@@ -19,8 +29,7 @@ describe('useFetchStatus', () => {
 
   beforeEach(() => {
     mockFetch.mockClear()
-    // Set up auth store mock
-    vi.mocked(useAuthStore.getState).mockReturnValue({
+    const mockState = {
       token: mockToken,
       user: null,
       expiresAt: null,
@@ -28,6 +37,12 @@ describe('useFetchStatus', () => {
       clearAuth: vi.fn(),
       isAuthenticated: vi.fn(() => true),
       updateToken: vi.fn(),
+    }
+    // Mock useAuthStore.getState() for imperative access (used by apiClient internally)
+    vi.mocked(useAuthStore.getState).mockReturnValue(mockState)
+    // Mock useAuthStore(selector) for hook selector pattern
+    vi.mocked(useAuthStore).mockImplementation((selector) => {
+      return selector ? selector(mockState) : mockState
     })
   })
 
@@ -46,18 +61,20 @@ describe('useFetchStatus', () => {
         ok: true,
         headers: new Headers(),
         json: async () => ({
-          id: fetchId,
-          userId: 'user-123',
+          fetch_id: fetchId,
           status: 'pending',
-          messageCount: 0,
-          error: null,
-          startedAt: new Date().toISOString(),
-          completedAt: null,
+          current_phase: 'fetching',
+          messages_count: 0,
+          error_message: null,
+          started_at: new Date().toISOString(),
+          completed_at: null,
+          total_channels: 1,
+          completed_channels: 0,
         }),
       })
     })
 
-    const { result } = renderHook(() => useFetchStatus(fetchId))
+    const { result } = renderHook(() => useFetchStatus(fetchId), { wrapper: createWrapper() })
 
     // Initial call
     await waitFor(() => expect(result.current.data?.status).toBe('pending'), { timeout: 3000 })
@@ -81,18 +98,20 @@ describe('useFetchStatus', () => {
         ok: true,
         headers: new Headers(),
         json: async () => ({
-          id: fetchId,
-          userId: 'user-123',
+          fetch_id: fetchId,
           status: 'in_progress',
-          messageCount: 150,
-          error: null,
-          startedAt: new Date().toISOString(),
-          completedAt: null,
+          current_phase: 'fetching',
+          messages_count: 150,
+          error_message: null,
+          started_at: new Date().toISOString(),
+          completed_at: null,
+          total_channels: 2,
+          completed_channels: 1,
         }),
       })
     })
 
-    const { result } = renderHook(() => useFetchStatus(fetchId))
+    const { result } = renderHook(() => useFetchStatus(fetchId), { wrapper: createWrapper() })
 
     // Wait for initial data to be loaded
     await waitFor(() => expect(result.current.data?.status).toBe('in_progress'), { timeout: 3000 })
@@ -117,18 +136,20 @@ describe('useFetchStatus', () => {
         ok: true,
         headers: new Headers(),
         json: async () => ({
-          id: fetchId,
-          userId: 'user-123',
+          fetch_id: fetchId,
           status: 'completed',
-          messageCount: 500,
-          error: null,
-          startedAt: new Date().toISOString(),
-          completedAt: new Date().toISOString(),
+          current_phase: 'completed',
+          messages_count: 500,
+          error_message: null,
+          started_at: new Date().toISOString(),
+          completed_at: new Date().toISOString(),
+          total_channels: 2,
+          completed_channels: 2,
         }),
       })
     })
 
-    const { result } = renderHook(() => useFetchStatus(fetchId))
+    const { result } = renderHook(() => useFetchStatus(fetchId), { wrapper: createWrapper() })
 
     // Wait for data to be loaded
     await waitFor(() => expect(result.current.data?.status).toBe('completed'), {
@@ -154,18 +175,20 @@ describe('useFetchStatus', () => {
         ok: true,
         headers: new Headers(),
         json: async () => ({
-          id: fetchId,
-          userId: 'user-123',
+          fetch_id: fetchId,
           status: 'failed',
-          messageCount: 0,
-          error: 'Network error occurred',
-          startedAt: new Date().toISOString(),
-          completedAt: new Date().toISOString(),
+          current_phase: 'failed',
+          messages_count: 0,
+          error_message: 'Network error occurred',
+          started_at: new Date().toISOString(),
+          completed_at: new Date().toISOString(),
+          total_channels: 1,
+          completed_channels: 0,
         }),
       })
     })
 
-    const { result } = renderHook(() => useFetchStatus(fetchId))
+    const { result } = renderHook(() => useFetchStatus(fetchId), { wrapper: createWrapper() })
 
     // Wait for data to be loaded
     await waitFor(() => expect(result.current.data?.status).toBe('failed'), {
@@ -182,8 +205,8 @@ describe('useFetchStatus', () => {
   })
 
   it('should not poll if fetchId is null or undefined', () => {
-    const { result: resultNull } = renderHook(() => useFetchStatus(null))
-    const { result: resultUndefined } = renderHook(() => useFetchStatus(undefined))
+    const { result: resultNull } = renderHook(() => useFetchStatus(null), { wrapper: createWrapper() })
+    const { result: resultUndefined } = renderHook(() => useFetchStatus(undefined), { wrapper: createWrapper() })
 
     expect(resultNull.current.data).toBeNull()
     expect(resultUndefined.current.data).toBeNull()
@@ -198,18 +221,20 @@ describe('useFetchStatus', () => {
         ok: true,
         headers: new Headers(),
         json: async () => ({
-          id: fetchId,
-          userId: 'user-123',
+          fetch_id: fetchId,
           status: 'pending',
-          messageCount: 0,
-          error: null,
-          startedAt: new Date().toISOString(),
-          completedAt: null,
+          current_phase: 'fetching',
+          messages_count: 0,
+          error_message: null,
+          started_at: new Date().toISOString(),
+          completed_at: null,
+          total_channels: 1,
+          completed_channels: 0,
         }),
       })
     })
 
-    const { result } = renderHook(() => useFetchStatus(fetchId))
+    const { result } = renderHook(() => useFetchStatus(fetchId), { wrapper: createWrapper() })
 
     // Should start in loading state
     expect(result.current.isLoading).toBe(true)

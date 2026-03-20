@@ -61,4 +61,3 @@ export function useTriggerFetch() {
     error: mutation.error as Error | null,
   }
 }
-

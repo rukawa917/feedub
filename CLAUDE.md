@@ -15,8 +15,11 @@ cd backend && uv run pytest tests/unit/ -v              # Backend unit tests onl
 cd backend && uv run pytest tests/unit/test_foo.py -v   # Single backend test file
 cd backend && uv run pytest tests/unit/test_foo.py::TestClass::test_name -v  # Single test
 cd backend && uv run pytest tests/contract/ -v          # API contract tests
-cd frontend && npm test run                              # Frontend unit tests (vitest)
+cd frontend && npx vitest run                             # Frontend unit tests (vitest)
 cd frontend && npm run test:e2e                          # Playwright E2E (needs dev server)
+# IMPORTANT: Always use `vitest run` (not `vitest`) to avoid watch mode.
+# After running frontend tests, kill any lingering vitest processes:
+# pkill -f vitest
 
 # Linting & Formatting
 make lint               # Lint + format + type-check both

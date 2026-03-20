@@ -41,4 +41,3 @@ export const safeGetItem = <T>(key: string): T | null => {
     return null
   }
 }
-

@@ -60,7 +60,9 @@ def uninstall(
     # 2. Print goodbye BEFORE self-removal
     success("Uninstalled feedub package")
     console.print()
-    console.print("[bold green]Feedub has been completely removed. Goodbye![/bold green]")
+    console.print(
+        "[bold green]Feedub has been completely removed. Goodbye![/bold green]"
+    )
     console.print()
 
     # 3. Self-remove — MUST be last action

@@ -72,7 +72,9 @@ class AuthService:
             existing_session = None
             if existing_user and existing_user.session_string:
                 existing_session = existing_user.session_string
-                logger.info(f"Attempting to reuse existing session for phone={_mask_phone(phone_number)}")
+                logger.info(
+                    f"Attempting to reuse existing session for phone={_mask_phone(phone_number)}"
+                )
                 # NOTE: Removed validate_session() call - it creates a race condition
                 # Session can become invalid between validation and use
                 # Let send_code_request() detect and handle invalid sessions (it has retry logic)
@@ -140,7 +142,9 @@ class AuthService:
         """
         start_time = time.time()
         has_2fa = "with_2fa" if password else "without_2fa"
-        logger.info(f"Starting code verification for phone={_mask_phone(phone_number)}, mode={has_2fa}")
+        logger.info(
+            f"Starting code verification for phone={_mask_phone(phone_number)}, mode={has_2fa}"
+        )
 
         try:
             # Retrieve user with temporary session

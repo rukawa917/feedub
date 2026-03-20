@@ -22,6 +22,7 @@ describe('LoginForm Integration Tests', () => {
     global.fetch = vi.fn().mockResolvedValueOnce({
       ok: true,
       status: 200,
+      headers: { get: vi.fn(() => null) },
       json: async () => ({
         message: 'Verification code sent',
         phone_hash: 'mock-hash-123',
@@ -58,6 +59,7 @@ describe('LoginForm Integration Tests', () => {
     global.fetch = vi.fn().mockResolvedValueOnce({
       ok: false,
       status: 422,
+      headers: { get: vi.fn(() => null) },
       json: async () => ({
         detail: 'Invalid phone number format',
       }),
@@ -67,10 +69,11 @@ describe('LoginForm Integration Tests', () => {
     render(<LoginForm onSuccess={mockOnSuccess} />)
 
     const phoneInput = screen.getByLabelText(/phone number/i)
-    await user.type(phoneInput, '+123') // Invalid short number
+    // Use a valid E.164 number so form validation passes and the API call is made
+    await user.type(phoneInput, '+447911123456')
     await user.click(screen.getByRole('button', { name: /request code/i }))
 
-    // Wait for error to be displayed
+    // Wait for API error to be displayed
     await waitFor(
       () => {
         expect(screen.getByText(/invalid phone number/i)).toBeInTheDocument()

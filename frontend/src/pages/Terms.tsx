@@ -150,8 +150,9 @@ export default function Terms() {
             <div className="p-4 border border-border rounded-lg bg-card/50 space-y-3">
               <p className="text-sm text-muted-foreground leading-relaxed">
                 <strong className="text-foreground">Important:</strong> AI-generated insights are
-                created using your configured LLM provider and may contain inaccuracies, hallucinations, or errors.
-                By using the Insights feature, you acknowledge and agree that:
+                created using your configured LLM provider and may contain inaccuracies,
+                hallucinations, or errors. By using the Insights feature, you acknowledge and agree
+                that:
               </p>
               <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground leading-relaxed">
                 <li>AI insights are provided for informational purposes only</li>
@@ -257,8 +258,8 @@ export default function Terms() {
               </p>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 <strong className="text-foreground">Self-Hosted:</strong> Feedub is provided as
-                self-hosted open-source software. You are responsible for your own deployment,
-                data, and infrastructure.
+                self-hosted open-source software. You are responsible for your own deployment, data,
+                and infrastructure.
               </p>
             </div>
           </section>
@@ -278,8 +279,8 @@ export default function Terms() {
               <div>
                 <h4 className="font-medium text-foreground mb-2 text-sm">By Feedub</h4>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Since Feedub is self-hosted, you have full control over your installation. You
-                  may stop using the service at any time by shutting down your local instance.
+                  Since Feedub is self-hosted, you have full control over your installation. You may
+                  stop using the service at any time by shutting down your local instance.
                 </p>
               </div>
             </div>
@@ -315,7 +316,12 @@ export default function Terms() {
             <div className="p-4 border border-border rounded-lg bg-card/50">
               <p className="text-sm text-foreground">
                 GitHub:{' '}
-                <a href="https://github.com/feeduby/feedub_v2/issues" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                <a
+                  href="https://github.com/feeduby/feedub_v2/issues"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
                   Open an issue
                 </a>
               </p>

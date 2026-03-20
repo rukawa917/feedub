@@ -4,7 +4,9 @@ import userEvent from '@testing-library/user-event'
 import { MediaDownloadButton } from '@/components/messages/MediaDownloadButton'
 import * as messageService from '@/services/message-service'
 
-vi.mock('@/services/message-service')
+vi.mock('@/services/message-service', () => ({
+  getMessageMedia: vi.fn(),
+}))
 
 describe('MediaDownloadButton', () => {
   const mockToken = 'mock-jwt-token'
@@ -27,7 +29,7 @@ describe('MediaDownloadButton', () => {
   it('should download media when clicked', async () => {
     const user = userEvent.setup()
     const mockBlob = new Blob(['mock data'], { type: 'image/jpeg' })
-    vi.mocked(messageService.downloadMedia).mockResolvedValue(mockBlob)
+    vi.mocked(messageService.getMessageMedia).mockResolvedValue(mockBlob)
 
     render(
       <MediaDownloadButton messageId="123" fileName="photo.jpg" mimeType="image/jpeg" token={mockToken} />
@@ -37,7 +39,7 @@ describe('MediaDownloadButton', () => {
     await user.click(button)
 
     await waitFor(() => {
-      expect(messageService.downloadMedia).toHaveBeenCalledWith('123', mockToken)
+      expect(messageService.getMessageMedia).toHaveBeenCalledWith(mockToken, '123')
     })
 
     // Verify button returns to normal state after download
@@ -46,7 +48,7 @@ describe('MediaDownloadButton', () => {
 
   it('should show loading state during download', async () => {
     const user = userEvent.setup()
-    vi.mocked(messageService.downloadMedia).mockImplementation(
+    vi.mocked(messageService.getMessageMedia).mockImplementation(
       () => new Promise(() => {}) // Never resolves
     )
 
@@ -62,7 +64,7 @@ describe('MediaDownloadButton', () => {
 
   it('should show error when download fails', async () => {
     const user = userEvent.setup()
-    vi.mocked(messageService.downloadMedia).mockRejectedValue(
+    vi.mocked(messageService.getMessageMedia).mockRejectedValue(
       new Error('Media not available')
     )
 

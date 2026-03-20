@@ -180,8 +180,7 @@ export function MessageContent({ content, className }: MessageContentProps) {
           p: ({ children }) => <p dir="auto">{children}</p>,
           // Custom link handling for security - open in new tab
           a: ({ href, children }) => {
-            const safeHref =
-              href && /^javascript:/i.test(href) ? undefined : href
+            const safeHref = href && /^javascript:/i.test(href) ? undefined : href
             return (
               <a
                 href={safeHref}

@@ -53,9 +53,14 @@ class InsightsService:
         """Set llm_consent_given=False for the user."""
         await self.insights_repo.set_consent(user_id, False)
 
-    async def check_consent(self, user_id: UUID) -> bool:
-        """Check if user has given LLM consent."""
-        return await self.insights_repo.get_consent(user_id)
+    async def check_consent(self, user_id: UUID) -> tuple[bool, str | None, str, bool]:
+        """Check if user has given LLM consent.
+
+        Returns:
+            Tuple of (has_consent, consent_version, current_version, requires_re_consent)
+        """
+        has_consent = await self.insights_repo.get_consent(user_id)
+        return has_consent, None, "1.0", False
 
     # =========================================================================
     # Usage Management
@@ -97,11 +102,11 @@ class InsightsService:
         chat_ids: list[int],
         start_date: datetime,
         end_date: datetime,
-    ) -> tuple[bool, int, bool, int | None, int, dict | None]:
+    ) -> tuple[bool, int, bool, int | None, dict | None]:
         """Validate insight generation request.
 
         Returns:
-            Tuple of (valid, message_count, exceeds_limit, estimated_tokens, max_messages, suggested_filters)
+            Tuple of (valid, message_count, exceeds_limit, estimated_tokens, suggested_filters)
         """
         max_msgs = self.max_messages
 
@@ -129,7 +134,7 @@ class InsightsService:
 
         valid = not exceeds_limit and message_count > 0
 
-        return valid, message_count, exceeds_limit, estimated_tokens, max_msgs, suggested_filters
+        return valid, message_count, exceeds_limit, estimated_tokens, suggested_filters
 
     # =========================================================================
     # Generation
@@ -242,7 +247,8 @@ class InsightsService:
         4. Stores and returns the result
         """
         # Check consent
-        if not await self.check_consent(user_id):
+        has_consent, _, _, _ = await self.check_consent(user_id)
+        if not has_consent:
             raise ConsentRequiredError("User consent required for insights")
 
         # Check usage limits
@@ -304,7 +310,8 @@ class InsightsService:
         5. Stores and returns the result
         """
         # Check consent
-        if not await self.check_consent(user_id):
+        has_consent, _, _, _ = await self.check_consent(user_id)
+        if not has_consent:
             raise ConsentRequiredError("User consent required for insights")
 
         # Check usage limits

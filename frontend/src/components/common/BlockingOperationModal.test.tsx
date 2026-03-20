@@ -81,11 +81,11 @@ describe('BlockingOperationModal', () => {
 
       // Wait for confirmation dialog
       await waitFor(() => {
-        expect(screen.getByText('Continue Operation')).toBeInTheDocument()
+        expect(screen.getByText('No, Keep Running')).toBeInTheDocument()
       })
 
-      // Click continue
-      fireEvent.click(screen.getByText('Continue Operation'))
+      // Click continue (keep running)
+      fireEvent.click(screen.getByText('No, Keep Running'))
       expect(onCancel).not.toHaveBeenCalled()
     })
   })

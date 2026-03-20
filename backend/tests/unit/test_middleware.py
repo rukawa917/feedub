@@ -7,10 +7,10 @@ Tests token refresh middleware behavior.
 from datetime import timedelta
 from unittest.mock import patch
 
+import jwt
 import pytest
 from fastapi import FastAPI, Request
 from fastapi.testclient import TestClient
-import jwt
 
 from src.core.middleware import TokenRefreshMiddleware
 

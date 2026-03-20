@@ -880,7 +880,7 @@ describe('MessageCard', () => {
       const { container } = render(<MessageCard message={message} onClick={vi.fn()} />)
 
       // Chevron should be present with opacity transition
-      const chevron = container.querySelector('.opacity-0.group-hover\\:opacity-100')
+      const chevron = container.querySelector('.opacity-30.group-hover\\:opacity-100')
       expect(chevron).toBeInTheDocument()
     })
   })

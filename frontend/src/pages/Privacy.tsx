@@ -187,10 +187,9 @@ export default function Privacy() {
             <div className="p-4 border border-border rounded-lg bg-card/50">
               <p className="text-sm text-muted-foreground leading-relaxed">
                 When you use the Insights feature, message content from your selected channels is
-                sent to your configured LLM provider for analysis. This processing occurs only
-                when you explicitly request it and only for channels where you have granted AI
-                consent. You can revoke AI consent for any channel at any time through your channel
-                settings.
+                sent to your configured LLM provider for analysis. This processing occurs only when
+                you explicitly request it and only for channels where you have granted AI consent.
+                You can revoke AI consent for any channel at any time through your channel settings.
               </p>
             </div>
           </section>
@@ -244,9 +243,15 @@ export default function Privacy() {
             </ul>
             <p className="text-sm text-muted-foreground leading-relaxed mt-4">
               To exercise any of these rights, open an issue on{' '}
-              <a href="https://github.com/feeduby/feedub_v2/issues" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+              <a
+                href="https://github.com/feeduby/feedub_v2/issues"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline"
+              >
                 GitHub
-              </a>.
+              </a>
+              .
             </p>
           </section>
 
@@ -258,7 +263,9 @@ export default function Privacy() {
             </p>
             <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground leading-relaxed">
               <li>All data stored locally in your self-hosted SQLite database</li>
-              <li>HTTPS/TLS encryption for data transmission (when configured with reverse proxy)</li>
+              <li>
+                HTTPS/TLS encryption for data transmission (when configured with reverse proxy)
+              </li>
               <li>Configurable data retention to minimize stored data</li>
               <li>No password storage (authentication via Telegram only)</li>
               <li>JWT-based session management with configurable expiration</li>
@@ -275,7 +282,12 @@ export default function Privacy() {
             <div className="p-4 border border-border rounded-lg bg-card/50">
               <p className="text-sm text-foreground">
                 GitHub:{' '}
-                <a href="https://github.com/feeduby/feedub_v2/issues" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                <a
+                  href="https://github.com/feeduby/feedub_v2/issues"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
                   Open an issue
                 </a>
               </p>

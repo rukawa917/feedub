@@ -12,7 +12,9 @@ from feedub.utils import error
 VALID_SERVICES = ("backend", "frontend")
 
 
-def logs_cmd(service: str | None = None, tail: int = 100, no_follow: bool = False) -> None:
+def logs_cmd(
+    service: str | None = None, tail: int = 100, no_follow: bool = False
+) -> None:
     """Stream logs from feedub services.
 
     Optionally specify a service name: backend, frontend.

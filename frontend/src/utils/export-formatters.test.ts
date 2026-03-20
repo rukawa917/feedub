@@ -93,7 +93,7 @@ describe('export-formatters', () => {
       const result = formatAsTxt(mockMessages)
 
       expect(result).toContain('📎 Type: photo')
-      expect(result).toContain('Media: Photo (image.jpg, 2.50 MB)')
+      expect(result).toContain('Media: Photo (image.jpg, 2.5 MB)')
     })
 
     it('should show reply and forward indicators', () => {
@@ -128,7 +128,7 @@ describe('export-formatters', () => {
       const result = formatAsMarkdown(mockMessages)
 
       expect(result).toContain('- **Type:** photo')
-      expect(result).toContain('- **Media:** Photo (image.jpg, 2.50 MB)')
+      expect(result).toContain('- **Media:** Photo (image.jpg, 2.5 MB)')
       expect(result).toContain('- **Flags:** ↩️ Reply')
     })
 

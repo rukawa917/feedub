@@ -1,9 +1,19 @@
 // frontend/src/hooks/useChannelFavorites.test.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, waitFor, act } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import React from 'react'
 import { useChannelFavorites } from './useChannelFavorites'
 import * as channelsApi from '../services/api/channels'
 import { useAuthStore } from '../stores/auth'
+
+function createWrapper() {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  })
+  return ({ children }: { children: React.ReactNode }) =>
+    React.createElement(QueryClientProvider, { client: queryClient }, children)
+}
 
 // Mock channels API
 vi.mock('../services/api/channels')
@@ -61,7 +71,7 @@ describe('useChannelFavorites', () => {
         total: 2,
       })
 
-      const { result } = renderHook(() => useChannelFavorites())
+      const { result } = renderHook(() => useChannelFavorites(), { wrapper: createWrapper() })
 
       // Initially loading
       expect(result.current.isLoading).toBe(true)
@@ -82,7 +92,7 @@ describe('useChannelFavorites', () => {
       const error = new Error('Failed to fetch favorites')
       vi.mocked(channelsApi.getChannelFavorites).mockRejectedValue(error)
 
-      const { result } = renderHook(() => useChannelFavorites())
+      const { result } = renderHook(() => useChannelFavorites(), { wrapper: createWrapper() })
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false)
@@ -108,7 +118,7 @@ describe('useChannelFavorites', () => {
         return selector ? selector(nullTokenState) : nullTokenState
       })
 
-      const { result } = renderHook(() => useChannelFavorites())
+      const { result } = renderHook(() => useChannelFavorites(), { wrapper: createWrapper() })
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false)
@@ -125,7 +135,7 @@ describe('useChannelFavorites', () => {
         total: 2,
       })
 
-      const { result } = renderHook(() => useChannelFavorites())
+      const { result } = renderHook(() => useChannelFavorites(), { wrapper: createWrapper() })
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false)
@@ -141,7 +151,7 @@ describe('useChannelFavorites', () => {
         total: 2,
       })
 
-      const { result } = renderHook(() => useChannelFavorites())
+      const { result } = renderHook(() => useChannelFavorites(), { wrapper: createWrapper() })
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false)
@@ -171,7 +181,7 @@ describe('useChannelFavorites', () => {
         favorite: newFavorite,
       })
 
-      const { result } = renderHook(() => useChannelFavorites())
+      const { result } = renderHook(() => useChannelFavorites(), { wrapper: createWrapper() })
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false)
@@ -194,8 +204,10 @@ describe('useChannelFavorites', () => {
         channel_type: 'channel',
       })
 
-      // Should update local state
-      expect(result.current.favoriteIds.has(11111)).toBe(true)
+      // Should update local state (wait for cache update to propagate)
+      await waitFor(() => {
+        expect(result.current.favoriteIds.has(11111)).toBe(true)
+      })
       expect(result.current.favorites).toContainEqual(newFavorite)
     })
 
@@ -210,7 +222,7 @@ describe('useChannelFavorites', () => {
         favorite: null,
       })
 
-      const { result } = renderHook(() => useChannelFavorites())
+      const { result } = renderHook(() => useChannelFavorites(), { wrapper: createWrapper() })
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false)
@@ -228,8 +240,10 @@ describe('useChannelFavorites', () => {
       expect(toggleResult).toBe(false)
       expect(channelsApi.toggleChannelFavorite).toHaveBeenCalledWith(mockToken, 12345, undefined)
 
-      // Should update local state
-      expect(result.current.favoriteIds.has(12345)).toBe(false)
+      // Should update local state (wait for cache update to propagate)
+      await waitFor(() => {
+        expect(result.current.favoriteIds.has(12345)).toBe(false)
+      })
       expect(result.current.favorites?.find((f) => f.channel_id === 12345)).toBeUndefined()
     })
 
@@ -242,7 +256,7 @@ describe('useChannelFavorites', () => {
       const error = new Error('Failed to toggle favorite')
       vi.mocked(channelsApi.toggleChannelFavorite).mockRejectedValue(error)
 
-      const { result } = renderHook(() => useChannelFavorites())
+      const { result } = renderHook(() => useChannelFavorites(), { wrapper: createWrapper() })
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false)
@@ -257,7 +271,10 @@ describe('useChannelFavorites', () => {
         }
       })
 
-      expect(result.current.toggleError).toEqual(error)
+      // Wait for mutation error state to propagate
+      await waitFor(() => {
+        expect(result.current.toggleError).toEqual(error)
+      })
     })
 
     it('returns null if no token', async () => {
@@ -276,7 +293,7 @@ describe('useChannelFavorites', () => {
         return selector ? selector(nullTokenState) : nullTokenState
       })
 
-      const { result } = renderHook(() => useChannelFavorites())
+      const { result } = renderHook(() => useChannelFavorites(), { wrapper: createWrapper() })
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false)
@@ -299,7 +316,7 @@ describe('useChannelFavorites', () => {
         total: 2,
       })
 
-      const { result } = renderHook(() => useChannelFavorites())
+      const { result } = renderHook(() => useChannelFavorites(), { wrapper: createWrapper() })
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false)

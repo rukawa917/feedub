@@ -116,6 +116,7 @@ export function useChannelFavorites(): UseChannelFavoritesReturn {
     channelId: number,
     metadata?: AddChannelFavoriteRequest
   ): Promise<boolean | null> => {
+    if (!token) return null
     const res = await mutation.mutateAsync({ channelId, metadata })
     return res.is_favorite
   }

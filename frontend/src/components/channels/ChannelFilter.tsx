@@ -187,11 +187,17 @@ export function ChannelFilter({
       <div
         key={channel.channel_id}
         className={`flex items-center gap-2.5 p-2 rounded-lg transition-colors ${
-          isSelected ? 'bg-primary/5 hover:bg-primary/10' : isDisabled ? 'opacity-50' : 'hover:bg-accent'
+          isSelected
+            ? 'bg-primary/5 hover:bg-primary/10'
+            : isDisabled
+              ? 'opacity-50'
+              : 'hover:bg-accent'
         }`}
       >
         {/* Custom checkbox */}
-        <label className={`flex items-center gap-2.5 flex-1 min-w-0 group ${isDisabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}>
+        <label
+          className={`flex items-center gap-2.5 flex-1 min-w-0 group ${isDisabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+        >
           <div className="relative shrink-0">
             <input
               type="checkbox"
@@ -427,7 +433,8 @@ export function ChannelFilter({
       {/* Selection count */}
       {channels.length > 0 && (
         <p className="text-xs text-foreground-muted">
-          {selectedCount} of {hasLimit ? maxChannels : channels.length} channel{(hasLimit ? maxChannels : channels.length) !== 1 ? 's' : ''} selected
+          {selectedCount} of {hasLimit ? maxChannels : channels.length} channel
+          {(hasLimit ? maxChannels : channels.length) !== 1 ? 's' : ''} selected
           {hasLimit && ` (${maxChannels} max)`}
         </p>
       )}

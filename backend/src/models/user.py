@@ -77,5 +77,9 @@ class User(Base):
 
     def __repr__(self) -> str:
         """String representation for debugging (phone masked)."""
-        masked = f"{self.phone_number[:4]}***{self.phone_number[-4:]}" if self.phone_number and len(self.phone_number) > 8 else "***"
+        masked = (
+            f"{self.phone_number[:4]}***{self.phone_number[-4:]}"
+            if self.phone_number and len(self.phone_number) > 8
+            else "***"
+        )
         return f"<User(id={self.id}, phone={masked})>"

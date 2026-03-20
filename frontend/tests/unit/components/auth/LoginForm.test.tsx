@@ -105,7 +105,9 @@ describe('LoginForm Component', () => {
       await user.click(screen.getByRole('button', { name: /request code/i }))
 
       await waitFor(() => {
-        expect(screen.getByText(/E\.164 format/i)).toBeInTheDocument()
+        // Both help text and validation error match /E\.164 format/i
+        const messages = screen.getAllByText(/E\.164 format/i)
+        expect(messages.length).toBeGreaterThan(1)
       })
     })
 

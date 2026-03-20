@@ -17,7 +17,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.config import get_settings
 from src.core.database import get_async_engine, get_db
-from src.core.dependencies import get_current_user
 
 router = APIRouter()
 settings = get_settings()
@@ -96,7 +95,6 @@ async def liveness_check() -> LivenessResponse:
 @router.get("/health", response_model=HealthResponse)
 async def health_check(
     db: AsyncSession = Depends(get_db),  # noqa: B008
-    _current_user=Depends(get_current_user),  # noqa: B008
 ) -> HealthResponse:
     """
     Comprehensive health check endpoint (authenticated).
@@ -131,7 +129,6 @@ async def health_check(
 @router.get("/health/db", response_model=DatabaseDetailedHealth)
 async def database_health_check(
     db: AsyncSession = Depends(get_db),  # noqa: B008
-    _current_user=Depends(get_current_user),  # noqa: B008
 ) -> DatabaseDetailedHealth:
     """
     Detailed database health check endpoint.

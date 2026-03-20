@@ -43,7 +43,9 @@ def show() -> None:
     """Display current config (sensitive values masked)."""
     env = _load_env()
     if not env:
-        console.print("[yellow]No config found.[/yellow] Run [bold]feedub init[/bold] first.")
+        console.print(
+            "[yellow]No config found.[/yellow] Run [bold]feedub init[/bold] first."
+        )
         return
 
     table = Table(show_header=True, header_style="bold")

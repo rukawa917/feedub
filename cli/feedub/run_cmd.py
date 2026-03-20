@@ -13,7 +13,15 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 
 from feedub.config import load_config
 from feedub.constants import CONFIG_FILE, FEEDUB_HOME, LOG_DIR, PID_DIR
-from feedub.utils import console, error, info, is_process_alive, read_pid, success, write_pid
+from feedub.utils import (
+    console,
+    error,
+    info,
+    is_process_alive,
+    read_pid,
+    success,
+    write_pid,
+)
 
 
 BACKEND_HEALTH_URL = "http://localhost:8000/health/live"
@@ -97,6 +105,7 @@ def run_cmd(no_open: bool = False) -> None:
         raise SystemExit(1)
 
     import os
+
     proc_env = {**os.environ, **env}
 
     # 6. Start backend

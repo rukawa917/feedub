@@ -276,4 +276,3 @@ export type MessageLoadingState =
   | 'refreshing' // Manual refresh (show refresh spinner)
   | 'loadingMore' // Pagination (show button spinner)
   | 'error' // Error state (show error message)
-

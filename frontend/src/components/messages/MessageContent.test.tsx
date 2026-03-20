@@ -571,9 +571,9 @@ describe('MessageContent', () => {
       expect(ReactMarkdown).toHaveBeenCalled()
       const calls = vi.mocked(ReactMarkdown).mock.calls
       const lastCall = calls[calls.length - 1]
-      // React automatically decodes HTML entities when passed as JSX children
-      // So "&amp;" becomes "&" in the children prop
-      expect(lastCall[0].children).toBe('& < > "')
+      // DOMPurify sanitizes content before passing to ReactMarkdown.
+      // HTML entities like &amp;, &lt;, &gt; remain encoded after sanitization.
+      expect(lastCall[0].children).toBe('&amp; &lt; &gt; "')
     })
   })
 

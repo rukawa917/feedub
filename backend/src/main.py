@@ -71,6 +71,7 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+
 async def check_database_connection() -> None:
     """
     Verify database connection is available.
@@ -181,6 +182,7 @@ app = FastAPI(
     version=settings.api_version,
     lifespan=lifespan,
 )
+
 
 # Custom exception handlers
 @app.exception_handler(AuthenticationError)

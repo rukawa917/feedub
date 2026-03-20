@@ -38,7 +38,7 @@ class RevokeConsentResponse(BaseModel):
     """Response after revoking consent."""
 
     success: bool
-    revoked_at: datetime
+    revoked_at: datetime | None = None
 
 
 # ============================================================================
