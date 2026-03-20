@@ -7,8 +7,8 @@ import signal
 
 import typer
 
-from feedub.constants import DATA_DIR, PID_DIR
-from feedub.utils import console, is_process_alive, read_pid, success, warning
+from feedub.constants import BACKEND_PORT, DATA_DIR, FRONTEND_PORT, PID_DIR
+from feedub.utils import console, is_process_alive, kill_port, read_pid, success, warning
 
 
 def stop_cmd(remove_data: bool = False) -> None:
@@ -18,14 +18,12 @@ def stop_cmd(remove_data: bool = False) -> None:
 
     stopped_any = False
 
-    for name, pid_file in [
-        ("backend", backend_pid_file),
-        ("frontend", frontend_pid_file),
+    for name, pid_file, port in [
+        ("backend", backend_pid_file, BACKEND_PORT),
+        ("frontend", frontend_pid_file, FRONTEND_PORT),
     ]:
         pid = read_pid(pid_file)
-        if pid is None:
-            continue
-        if is_process_alive(pid):
+        if pid is not None and is_process_alive(pid):
             try:
                 os.kill(pid, signal.SIGTERM)
                 success(f"Stopped {name} (pid {pid})")
@@ -33,6 +31,12 @@ def stop_cmd(remove_data: bool = False) -> None:
             except ProcessLookupError:
                 pass
         pid_file.unlink(missing_ok=True)
+
+        # Fallback: kill whatever is on the port if PID file was stale/missing
+        port_pid = kill_port(port)
+        if port_pid is not None:
+            success(f"Freed port {port} (pid {port_pid})")
+            stopped_any = True
 
     if not stopped_any:
         warning("No running feedub processes found.")

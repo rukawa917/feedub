@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from rich.table import Table
 
-from feedub.constants import DATA_DIR, PID_DIR
+from feedub.constants import BACKEND_PORT, DATA_DIR, FRONTEND_PORT, PID_DIR
 from feedub.utils import console, info, is_process_alive, read_pid
 
 
@@ -23,8 +23,8 @@ def _disk_usage(path) -> str:
 def status_cmd() -> None:
     """Show status of feedub services."""
     services = [
-        ("backend", PID_DIR / "backend.pid", "8000"),
-        ("frontend", PID_DIR / "frontend.pid", "5173"),
+        ("backend", PID_DIR / "backend.pid", str(BACKEND_PORT)),
+        ("frontend", PID_DIR / "frontend.pid", str(FRONTEND_PORT)),
     ]
 
     table = Table(

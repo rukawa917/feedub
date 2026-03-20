@@ -12,7 +12,7 @@ from urllib.request import urlopen
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
 from feedub.config import load_config
-from feedub.constants import CONFIG_FILE, FEEDUB_HOME, LOG_DIR, PID_DIR
+from feedub.constants import BACKEND_PORT, CONFIG_FILE, FEEDUB_HOME, LOG_DIR, PID_DIR
 from feedub.utils import (
     console,
     error,
@@ -24,8 +24,8 @@ from feedub.utils import (
 )
 
 
-BACKEND_HEALTH_URL = "http://localhost:8000/health/live"
-FRONTEND_URL = "http://localhost:5173"
+BACKEND_HEALTH_URL = f"http://localhost:{BACKEND_PORT}/health/live"
+FRONTEND_URL = f"http://localhost:5173"
 HEALTH_POLL_INTERVAL = 3  # seconds
 HEALTH_TIMEOUT = 120  # seconds
 
@@ -112,7 +112,7 @@ def run_cmd(no_open: bool = False) -> None:
     console.print("[dim]Starting backend...[/dim]")
     backend_log = open(LOG_DIR / "backend.log", "a")
     backend_proc = subprocess.Popen(
-        ["uv", "run", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"],
+        ["uv", "run", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", str(BACKEND_PORT)],
         cwd=backend_dir,
         stdout=backend_log,
         stderr=backend_log,

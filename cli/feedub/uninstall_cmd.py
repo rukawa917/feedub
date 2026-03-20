@@ -43,7 +43,12 @@ def uninstall(
 
     console.print()
 
-    # 1. Remove ~/.feedub/ unless --keep-data
+    # 1. Stop running services and free ports
+    from feedub.stop_cmd import stop_cmd
+
+    stop_cmd()
+
+    # 2. Remove ~/.feedub/ unless --keep-data
     if not keep_data:
         feedub_home = FEEDUB_HOME
         if feedub_home.exists():
@@ -57,7 +62,7 @@ def uninstall(
     else:
         console.print(f"[dim]Kept {FEEDUB_HOME}/ (--keep-data)[/dim]")
 
-    # 2. Print goodbye BEFORE self-removal
+    # 3. Print goodbye BEFORE self-removal
     success("Uninstalled feedub package")
     console.print()
     console.print(
@@ -65,7 +70,7 @@ def uninstall(
     )
     console.print()
 
-    # 3. Self-remove — MUST be last action
+    # 4. Self-remove — MUST be last action
     subprocess.run(
         [sys.executable, "-m", "pip", "uninstall", "feedub", "-y"],
         check=False,

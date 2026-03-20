@@ -42,3 +42,29 @@ def is_process_alive(pid: int) -> bool:
         return True
     except (ProcessLookupError, PermissionError):
         return False
+
+
+def kill_port(port: int) -> int | None:
+    """Kill the process listening on a TCP port. Returns the PID if killed, else None."""
+    import signal
+    import subprocess
+
+    try:
+        result = subprocess.run(
+            ["lsof", "-ti", f":{port}"],
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0 or not result.stdout.strip():
+            return None
+        # lsof can return multiple PIDs (parent + child); kill all
+        for line in result.stdout.strip().splitlines():
+            pid = int(line.strip())
+            try:
+                os.kill(pid, signal.SIGTERM)
+            except (ProcessLookupError, PermissionError):
+                pass
+        # Return the first PID for reporting
+        return int(result.stdout.strip().splitlines()[0])
+    except (ValueError, FileNotFoundError):
+        return None
