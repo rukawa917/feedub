@@ -16,8 +16,8 @@ Feedub aggregates your Telegram messages into a searchable, filterable web inter
 
 ```bash
 # 1. Clone and install the CLI
-git clone https://github.com/feeduby/feedub_v2.git
-cd feedub_v2
+git clone https://github.com/rukawa917/feedub.git
+cd feedub
 pip install ./cli
 
 # 2. Setup and run
@@ -48,8 +48,8 @@ The CLI manages the backend and frontend processes, backups, upgrades, and confi
 ## Developer Setup
 
 ```bash
-git clone https://github.com/feeduby/feedub_v2.git
-cd feedub_v2
+git clone https://github.com/rukawa917/feedub.git
+cd feedub
 
 # One-command setup
 make setup    # Installs deps, initializes SQLite DB, runs migrations
@@ -207,8 +207,8 @@ The user also needs **Telegram API credentials** (free, no usage limits) from [m
 ### Installation
 
 ```bash
-git clone https://github.com/feeduby/feedub_v2.git
-cd feedub_v2
+git clone https://github.com/rukawa917/feedub.git
+cd feedub
 pip install ./cli
 feedub init      # Setup wizard — prompts for Telegram credentials and LLM provider
 feedub run       # Starts backend (:8000) and frontend (:5173)
@@ -283,4 +283,4 @@ This project is licensed under the [MIT License](./LICENSE).
 
 ---
 
-If you find Feedub useful, please give it a star on [GitHub](https://github.com/feeduby/feedub_v2) — it helps others discover the project!
+If you find Feedub useful, please give it a star on [GitHub](https://github.com/rukawa917/feedub) — it helps others discover the project!

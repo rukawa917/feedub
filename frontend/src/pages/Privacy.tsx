@@ -244,7 +244,7 @@ export default function Privacy() {
             <p className="text-sm text-muted-foreground leading-relaxed mt-4">
               To exercise any of these rights, open an issue on{' '}
               <a
-                href="https://github.com/feeduby/feedub_v2/issues"
+                href="https://github.com/rukawa917/feedub/issues"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary hover:underline"
@@ -283,7 +283,7 @@ export default function Privacy() {
               <p className="text-sm text-foreground">
                 GitHub:{' '}
                 <a
-                  href="https://github.com/feeduby/feedub_v2/issues"
+                  href="https://github.com/rukawa917/feedub/issues"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary hover:underline"

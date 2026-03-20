@@ -13,8 +13,8 @@ Thanks for your interest in contributing! This guide will help you get started.
 ### Quick Start
 
 ```bash
-git clone https://github.com/feeduby/feedub_v2.git
-cd feedub_v2
+git clone https://github.com/rukawa917/feedub.git
+cd feedub
 make setup    # Installs deps, starts DB, runs migrations
 make dev      # Backend on :8000, Frontend on :5173
 ```

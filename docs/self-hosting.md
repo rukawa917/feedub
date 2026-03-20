@@ -52,8 +52,8 @@ These credentials are free and have no usage limits. They identify your app to T
 ## 2. Install and Run
 
 ```bash
-git clone https://github.com/feeduby/feedub_v2.git
-cd feedub_v2
+git clone https://github.com/rukawa917/feedub.git
+cd feedub
 pip install ./cli
 feedub init    # Detects project root, generates config in ~/.feedub/
                # Edit ~/.feedub/.env with your Telegram API credentials

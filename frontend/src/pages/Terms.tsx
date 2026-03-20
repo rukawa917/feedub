@@ -317,7 +317,7 @@ export default function Terms() {
               <p className="text-sm text-foreground">
                 GitHub:{' '}
                 <a
-                  href="https://github.com/feeduby/feedub_v2/issues"
+                  href="https://github.com/rukawa917/feedub/issues"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary hover:underline"
