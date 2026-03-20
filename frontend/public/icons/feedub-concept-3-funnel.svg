@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- Concept 3: The Funnel / Collector
+       Abstract funnel shape showing many inputs becoming unified feed
+       Color: Rich Amber/Gold - premium, warm, confident -->
+  <defs>
+    <linearGradient id="amber-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#EAB308"/>
+    </linearGradient>
+    <linearGradient id="amber-light" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FCD34D"/>
+      <stop offset="100%" stop-color="#FDE68A"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="96" fill="url(#amber-grad)"/>
+
+  <!-- Funnel shape - wide top, narrow bottom -->
+  <path d="M100 120
+           L412 120
+           Q432 120 432 140
+           L432 180
+           Q432 200 412 220
+           L320 320
+           Q300 340 300 360
+           L300 380
+           Q300 400 280 400
+           L232 400
+           Q212 400 212 380
+           L212 360
+           Q212 340 192 320
+           L100 220
+           Q80 200 80 180
+           L80 140
+           Q80 120 100 120
+           Z"
+        fill="white"/>
+
+  <!-- Input dots at top (multiple sources) -->
+  <circle cx="140" cy="160" r="20" fill="url(#amber-grad)"/>
+  <circle cx="210" cy="160" r="20" fill="url(#amber-grad)"/>
+  <circle cx="280" cy="160" r="20" fill="url(#amber-grad)"/>
+  <circle cx="350" cy="160" r="20" fill="url(#amber-grad)"/>
+
+  <!-- Flow lines inside funnel -->
+  <path d="M140 180 Q200 260 256 340" stroke="url(#amber-light)" stroke-width="8" fill="none" opacity="0.6"/>
+  <path d="M210 180 Q230 260 256 340" stroke="url(#amber-light)" stroke-width="8" fill="none" opacity="0.6"/>
+  <path d="M280 180 Q270 260 256 340" stroke="url(#amber-light)" stroke-width="8" fill="none" opacity="0.6"/>
+  <path d="M350 180 Q300 260 256 340" stroke="url(#amber-light)" stroke-width="8" fill="none" opacity="0.6"/>
+</svg>

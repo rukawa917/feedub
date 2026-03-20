@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feedub Icon Concepts</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: #0a0a0a;
+      color: #fafafa;
+      min-height: 100vh;
+      padding: 60px 40px;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #fff 0%, #888 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      color: #666;
+      font-size: 1.1rem;
+      margin-bottom: 60px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 40px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .concept {
+      background: #141414;
+      border-radius: 24px;
+      padding: 32px;
+      border: 1px solid #222;
+      transition: all 0.3s ease;
+    }
+
+    .concept:hover {
+      border-color: #444;
+      transform: translateY(-4px);
+    }
+
+    .concept-number {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 8px;
+    }
+
+    .concept-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .concept-desc {
+      font-size: 0.9rem;
+      color: #888;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .icon-preview {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 20px;
+    }
+
+    .icon-large {
+      width: 120px;
+      height: 120px;
+      border-radius: 24px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .icon-large img {
+      width: 100%;
+      height: 100%;
+    }
+
+    .icon-sizes {
+      display: flex;
+      gap: 16px;
+      align-items: flex-end;
+    }
+
+    .icon-size {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .icon-size img {
+      border-radius: 8px;
+    }
+
+    .icon-size span {
+      font-size: 0.7rem;
+      color: #555;
+    }
+
+    .color-badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      background: #222;
+      color: #aaa;
+    }
+
+    .section-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #666;
+      margin-top: 60px;
+      margin-bottom: 24px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .notes {
+      background: #0f0f0f;
+      border: 1px solid #1a1a1a;
+      border-radius: 16px;
+      padding: 24px;
+      margin-top: 60px;
+      max-width: 800px;
+    }
+
+    .notes h3 {
+      font-size: 1rem;
+      margin-bottom: 16px;
+      color: #888;
+    }
+
+    .notes ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .notes li {
+      font-size: 0.9rem;
+      color: #666;
+      padding-left: 20px;
+      position: relative;
+    }
+
+    .notes li::before {
+      content: "✕";
+      position: absolute;
+      left: 0;
+      color: #ef4444;
+      font-size: 0.7rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Feedub Icon Concepts</h1>
+  <p class="subtitle">Distinctive icons for a Telegram message aggregation service</p>
+
+  <div class="grid">
+    <div class="concept">
+      <div class="concept-number">Concept 01</div>
+      <div class="concept-title">Convergent Streams</div>
+      <p class="concept-desc">Three flowing streams merging into one focal point. Visually represents multiple message sources being aggregated into a unified feed.</p>
+      <div class="icon-preview">
+        <div class="icon-large">
+          <img src="feedub-concept-1-convergent.svg" alt="Convergent Streams">
+        </div>
+        <div class="icon-sizes">
+          <div class="icon-size">
+            <img src="feedub-concept-1-convergent.svg" width="64" height="64" alt="">
+            <span>64px</span>
+          </div>
+          <div class="icon-size">
+            <img src="feedub-concept-1-convergent.svg" width="32" height="32" alt="">
+            <span>32px</span>
+          </div>
+          <div class="icon-size">
+            <img src="feedub-concept-1-convergent.svg" width="16" height="16" alt="">
+            <span>16px</span>
+          </div>
+        </div>
+      </div>
+      <span class="color-badge">Coral / Salmon</span>
+    </div>
+
+    <div class="concept">
+      <div class="concept-number">Concept 02</div>
+      <div class="concept-title">Layered Cards</div>
+      <p class="concept-desc">Stacked message cards showing depth and aggregation. The badge shows count of sources. Classic, immediately understandable.</p>
+      <div class="icon-preview">
+        <div class="icon-large">
+          <img src="feedub-concept-2-layered.svg" alt="Layered Cards">
+        </div>
+        <div class="icon-sizes">
+          <div class="icon-size">
+            <img src="feedub-concept-2-layered.svg" width="64" height="64" alt="">
+            <span>64px</span>
+          </div>
+          <div class="icon-size">
+            <img src="feedub-concept-2-layered.svg" width="32" height="32" alt="">
+            <span>32px</span>
+          </div>
+          <div class="icon-size">
+            <img src="feedub-concept-2-layered.svg" width="16" height="16" alt="">
+            <span>16px</span>
+          </div>
+        </div>
+      </div>
+      <span class="color-badge">Deep Teal</span>
+    </div>
+
+    <div class="concept">
+      <div class="concept-number">Concept 03</div>
+      <div class="concept-title">The Funnel</div>
+      <p class="concept-desc">Abstract funnel collecting multiple inputs into one stream. Shows transformation from many to one. Strong visual metaphor.</p>
+      <div class="icon-preview">
+        <div class="icon-large">
+          <img src="feedub-concept-3-funnel.svg" alt="The Funnel">
+        </div>
+        <div class="icon-sizes">
+          <div class="icon-size">
+            <img src="feedub-concept-3-funnel.svg" width="64" height="64" alt="">
+            <span>64px</span>
+          </div>
+          <div class="icon-size">
+            <img src="feedub-concept-3-funnel.svg" width="32" height="32" alt="">
+            <span>32px</span>
+          </div>
+          <div class="icon-size">
+            <img src="feedub-concept-3-funnel.svg" width="16" height="16" alt="">
+            <span>16px</span>
+          </div>
+        </div>
+      </div>
+      <span class="color-badge">Rich Amber</span>
+    </div>
+
+    <div class="concept">
+      <div class="concept-number">Concept 04</div>
+      <div class="concept-title">Signal Mark</div>
+      <p class="concept-desc">Abstract "F" formed by signal waves. Modern, tech-forward, suggests broadcasting and collection. Bold and memorable.</p>
+      <div class="icon-preview">
+        <div class="icon-large">
+          <img src="feedub-concept-4-signal.svg" alt="Signal Mark">
+        </div>
+        <div class="icon-sizes">
+          <div class="icon-size">
+            <img src="feedub-concept-4-signal.svg" width="64" height="64" alt="">
+            <span>64px</span>
+          </div>
+          <div class="icon-size">
+            <img src="feedub-concept-4-signal.svg" width="32" height="32" alt="">
+            <span>32px</span>
+          </div>
+          <div class="icon-size">
+            <img src="feedub-concept-4-signal.svg" width="16" height="16" alt="">
+            <span>16px</span>
+          </div>
+        </div>
+      </div>
+      <span class="color-badge">Magenta / Fuchsia</span>
+    </div>
+
+    <div class="concept">
+      <div class="concept-number">Concept 05</div>
+      <div class="concept-title">The Nexus</div>
+      <p class="concept-desc">Central hub with converging paths from all directions. Suggests a command center for information. Sophisticated and powerful.</p>
+      <div class="icon-preview">
+        <div class="icon-large">
+          <img src="feedub-concept-5-nexus.svg" alt="The Nexus">
+        </div>
+        <div class="icon-sizes">
+          <div class="icon-size">
+            <img src="feedub-concept-5-nexus.svg" width="64" height="64" alt="">
+            <span>64px</span>
+          </div>
+          <div class="icon-size">
+            <img src="feedub-concept-5-nexus.svg" width="32" height="32" alt="">
+            <span>32px</span>
+          </div>
+          <div class="icon-size">
+            <img src="feedub-concept-5-nexus.svg" width="16" height="16" alt="">
+            <span>16px</span>
+          </div>
+        </div>
+      </div>
+      <span class="color-badge">Indigo / Violet</span>
+    </div>
+
+    <div class="concept">
+      <div class="concept-number">Concept 06</div>
+      <div class="concept-title">Abstract F</div>
+      <p class="concept-desc">Bold geometric lettermark with dynamic negative space. Clean, professional, strongly branded. Scales excellently.</p>
+      <div class="icon-preview">
+        <div class="icon-large">
+          <img src="feedub-concept-6-abstract-f.svg" alt="Abstract F">
+        </div>
+        <div class="icon-sizes">
+          <div class="icon-size">
+            <img src="feedub-concept-6-abstract-f.svg" width="64" height="64" alt="">
+            <span>64px</span>
+          </div>
+          <div class="icon-size">
+            <img src="feedub-concept-6-abstract-f.svg" width="32" height="32" alt="">
+            <span>32px</span>
+          </div>
+          <div class="icon-size">
+            <img src="feedub-concept-6-abstract-f.svg" width="16" height="16" alt="">
+            <span>16px</span>
+          </div>
+        </div>
+      </div>
+      <span class="color-badge">Warm Red-Orange</span>
+    </div>
+  </div>
+
+  <div class="notes">
+    <h3>Avoided Existing Service Resemblances</h3>
+    <ul>
+      <li>Telegram - Paper airplane</li>
+      <li>WhatsApp - Chat bubble / Phone icon</li>
+      <li>Slack - Hashtag / Grid</li>
+      <li>Discord - Game controller shape</li>
+      <li>RSS - Orange broadcast waves</li>
+      <li>iMessage - Blue chat bubble</li>
+      <li>Messenger - Lightning bolt / Blue bubble</li>
+    </ul>
+  </div>
+</body>
+</html>

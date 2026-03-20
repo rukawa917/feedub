@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <defs>
+    <linearGradient id="feedub-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="32" height="32" rx="6" fill="url(#feedub-grad)"/>
+
+  <!-- Simplified converging lines for small size -->
+  <path d="M5 5 L13 13" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+  <path d="M27 5 L19 13" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+  <path d="M5 27 L13 19" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+  <path d="M27 27 L19 19" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+
+  <!-- Side inputs -->
+  <path d="M4 16 L12 16" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+  <path d="M28 16 L20 16" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+  <path d="M16 4 L16 12" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+
+  <!-- Central hub -->
+  <circle cx="16" cy="16" r="5" fill="white"/>
+  <circle cx="16" cy="16" r="3" fill="url(#feedub-grad)"/>
+</svg>

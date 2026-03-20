@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- Concept 4: Signal Mark
+       Abstract "F" formed by signal waves - broadcast/collection
+       Color: Deep Magenta/Fuchsia - bold, modern, distinctive -->
+  <defs>
+    <linearGradient id="magenta-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#DB2777"/>
+      <stop offset="100%" stop-color="#EC4899"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="96" fill="url(#magenta-grad)"/>
+
+  <!-- Abstract F formed by curved signal lines -->
+  <!-- Vertical stem -->
+  <rect x="120" y="100" width="48" height="312" rx="24" fill="white"/>
+
+  <!-- Top horizontal arc (signal wave) -->
+  <path d="M168 124 Q280 124 340 180 Q400 240 400 180"
+        stroke="white" stroke-width="48" stroke-linecap="round" fill="none"/>
+
+  <!-- Middle horizontal arc (signal wave) - shorter -->
+  <path d="M168 256 Q260 256 300 220"
+        stroke="white" stroke-width="40" stroke-linecap="round" fill="none"/>
+
+  <!-- Small signal dots emanating -->
+  <circle cx="380" cy="140" r="16" fill="white" opacity="0.6"/>
+  <circle cx="420" cy="180" r="12" fill="white" opacity="0.4"/>
+</svg>

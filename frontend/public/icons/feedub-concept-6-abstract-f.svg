@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- Concept 6: Abstract F Lettermark
+       Bold geometric F with dynamic negative space suggesting flow
+       Color: Warm Red-Orange - energetic, distinctive -->
+  <defs>
+    <linearGradient id="red-orange-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EF4444"/>
+      <stop offset="100%" stop-color="#F97316"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="96" fill="url(#red-orange-grad)"/>
+
+  <!-- Bold F shape with cut-out creating dynamic flow -->
+  <path d="M140 80
+           L400 80
+           Q420 80 420 100
+           L420 160
+           Q420 180 400 180
+           L220 180
+           L220 230
+           L340 230
+           Q360 230 360 250
+           L360 300
+           Q360 320 340 320
+           L220 320
+           L220 412
+           Q220 432 200 432
+           L140 432
+           Q120 432 120 412
+           L120 100
+           Q120 80 140 80
+           Z"
+        fill="white"/>
+
+  <!-- Dynamic cut/flow element -->
+  <path d="M220 180 L320 130 L320 80 L220 80 Z" fill="url(#red-orange-grad)" opacity="0.3"/>
+</svg>

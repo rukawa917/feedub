@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- Concept 5: The Nexus
+       Central hub with converging paths - data coming together
+       Color: Indigo/Violet blend - deep, sophisticated -->
+  <defs>
+    <linearGradient id="indigo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="96" fill="url(#indigo-grad)"/>
+
+  <!-- Converging lines from corners/edges to center -->
+  <!-- Top-left -->
+  <path d="M80 80 L220 220" stroke="white" stroke-width="28" stroke-linecap="round" opacity="0.5"/>
+  <!-- Top-right -->
+  <path d="M432 80 L292 220" stroke="white" stroke-width="28" stroke-linecap="round" opacity="0.5"/>
+  <!-- Bottom-left -->
+  <path d="M80 432 L220 292" stroke="white" stroke-width="28" stroke-linecap="round" opacity="0.5"/>
+  <!-- Bottom-right -->
+  <path d="M432 432 L292 292" stroke="white" stroke-width="28" stroke-linecap="round" opacity="0.5"/>
+
+  <!-- Side inputs -->
+  <path d="M60 256 L200 256" stroke="white" stroke-width="32" stroke-linecap="round" opacity="0.7"/>
+  <path d="M452 256 L312 256" stroke="white" stroke-width="32" stroke-linecap="round" opacity="0.7"/>
+  <path d="M256 60 L256 200" stroke="white" stroke-width="32" stroke-linecap="round" opacity="0.7"/>
+
+  <!-- Central hub -->
+  <circle cx="256" cy="256" r="72" fill="white"/>
+  <circle cx="256" cy="256" r="44" fill="url(#indigo-grad)"/>
+
+  <!-- Inner glow effect -->
+  <circle cx="256" cy="256" r="24" fill="white" opacity="0.8"/>
+</svg>

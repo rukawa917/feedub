@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- Concept 2: Layered Cards
+       Stacked message cards showing aggregation from multiple sources
+       Color: Deep Teal - fresh, professional, distinctive -->
+  <defs>
+    <linearGradient id="teal-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0D9488"/>
+      <stop offset="100%" stop-color="#14B8A6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="96" fill="url(#teal-grad)"/>
+
+  <!-- Back card (third layer) -->
+  <rect x="160" y="100" width="240" height="160" rx="20" fill="white" opacity="0.4"/>
+
+  <!-- Middle card (second layer) -->
+  <rect x="120" y="160" width="260" height="160" rx="20" fill="white" opacity="0.7"/>
+
+  <!-- Front card (main layer) -->
+  <rect x="80" y="220" width="280" height="180" rx="24" fill="white"/>
+
+  <!-- Message lines on front card -->
+  <rect x="120" y="260" width="140" height="16" rx="8" fill="#0D9488" opacity="0.8"/>
+  <rect x="120" y="296" width="200" height="12" rx="6" fill="#0D9488" opacity="0.4"/>
+  <rect x="120" y="324" width="180" height="12" rx="6" fill="#0D9488" opacity="0.4"/>
+  <rect x="120" y="352" width="120" height="12" rx="6" fill="#0D9488" opacity="0.4"/>
+
+  <!-- Aggregation indicator - small badge -->
+  <circle cx="380" cy="240" r="36" fill="#F97316"/>
+  <text x="380" y="250" text-anchor="middle" font-family="system-ui" font-weight="700" font-size="32" fill="white">3</text>
+</svg>

@@ -1,0 +1,420 @@
+@import 'tailwindcss';
+@plugin "@tailwindcss/typography";
+
+/*
+ * Typography System - "Refined Editorial"
+ * - Newsreader: Elegant serif for display (headings, sender names, wordmark)
+ * - DM Sans: Modern geometric sans for UI and body text
+ * - JetBrains Mono: Monospace for timestamps, counts, data
+ * - Noto Sans KR: Korean support
+ */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Noto+Sans+KR:wght@400;500;600;700&display=swap');
+
+@layer base {
+  :root {
+    /*
+     * DARK THEME — "Warm Obsidian"
+     * Deep warm charcoal with honey gold accents
+     */
+
+    /* Backgrounds - layered surfaces */
+    --background: 220 15% 8%;
+    --background-subtle: 220 12% 11%;
+    --background-elevated: 220 10% 14%;
+    --background-muted: 220 10% 14%;
+
+    /* Text - warm off-white with levels */
+    --foreground: 45 10% 95%;
+    --foreground-secondary: 220 10% 70%;
+    --foreground-muted: 220 10% 50%;
+
+    /* Cards */
+    --card: 220 12% 11%;
+    --card-elevated: 220 10% 14%;
+    --card-foreground: 45 10% 95%;
+
+    /* Popover/Dialog */
+    --popover: 220 12% 13%;
+    --popover-foreground: 45 10% 95%;
+
+    /* Primary - Rich honey gold */
+    --primary: 38 92% 55%;
+    --primary-hover: 38 92% 62%;
+    --primary-foreground: 220 15% 8%;
+
+    /* Secondary */
+    --secondary: 220 12% 18%;
+    --secondary-foreground: 45 10% 90%;
+
+    /* Accent - Telegram teal */
+    --accent: 172 66% 50%;
+    --accent-soft: 172 40% 20%;
+    --accent-foreground: 220 15% 8%;
+
+    /* Teal (alias for accent) */
+    --teal: 172 66% 50%;
+    --teal-foreground: 220 15% 8%;
+
+    /* Muted */
+    --muted: 220 12% 18%;
+    --muted-foreground: 220 10% 55%;
+
+    /* Semantic colors */
+    --success: 152 60% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 220 15% 8%;
+    --error: 0 65% 55%;
+    --error-foreground: 0 0% 100%;
+    --info: 210 60% 55%;
+    --info-foreground: 0 0% 100%;
+
+    /* Destructive */
+    --destructive: 0 65% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Borders */
+    --border: 220 10% 18%;
+    --border-subtle: 220 10% 14%;
+    --border-highlight: 38 80% 45%;
+    --input: 220 12% 14%;
+    --ring: 38 92% 55%;
+
+    /* Radius */
+    --radius: 0.75rem;
+
+    /* Shadows for dark mode */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+
+    /* Chat type colors */
+    --chat-channel: 200 80% 50%;
+    --chat-group: 270 70% 60%;
+    --chat-supergroup: 320 70% 55%;
+    --chat-private: 160 70% 45%;
+
+    /* Media type accents */
+    --media-photo: 200 80% 55%;
+    --media-video: 280 70% 60%;
+    --media-document: 140 70% 45%;
+    --media-audio: 350 70% 55%;
+  }
+
+  /*
+   * LIGHT THEME — "Warm Paper"
+   * Cream paper with deep gold accents
+   */
+  .light {
+    /* Backgrounds */
+    --background: 40 30% 98%;
+    --background-subtle: 40 20% 95%;
+    --background-elevated: 0 0% 100%;
+    --background-muted: 40 15% 92%;
+
+    /* Text */
+    --foreground: 220 15% 15%;
+    --foreground-secondary: 220 10% 40%;
+    --foreground-muted: 220 10% 55%;
+
+    /* Cards */
+    --card: 0 0% 100%;
+    --card-elevated: 40 20% 98%;
+    --card-foreground: 220 15% 15%;
+
+    /* Popover/Dialog */
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 15% 15%;
+
+    /* Primary - Deeper gold for contrast */
+    --primary: 38 85% 40%;
+    --primary-hover: 38 85% 35%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary */
+    --secondary: 220 10% 92%;
+    --secondary-foreground: 220 15% 15%;
+
+    /* Accent - Darker teal */
+    --accent: 172 66% 40%;
+    --accent-soft: 172 30% 90%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Teal */
+    --teal: 172 66% 40%;
+    --teal-foreground: 0 0% 100%;
+
+    /* Muted */
+    --muted: 220 10% 92%;
+    --muted-foreground: 220 10% 45%;
+
+    /* Semantic colors */
+    --success: 152 55% 40%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 85% 45%;
+    --warning-foreground: 220 15% 15%;
+    --error: 0 70% 50%;
+    --error-foreground: 0 0% 100%;
+    --info: 210 55% 50%;
+    --info-foreground: 0 0% 100%;
+
+    /* Destructive */
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Borders - more visible in light mode */
+    --border: 220 10% 85%;
+    --border-subtle: 220 10% 90%;
+    --border-highlight: 38 60% 70%;
+    --input: 220 10% 92%;
+    --ring: 38 85% 40%;
+
+    /* Shadows for light mode */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  html {
+    font-family:
+      'DM Sans',
+      'Noto Sans KR',
+      system-ui,
+      -apple-system,
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-feature-settings: 'ss01', 'ss02', 'cv01';
+    min-height: 100vh;
+  }
+
+  /* Noise texture overlay - z-index: -1 to stay behind all content */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    opacity: 0.015;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--background-subtle));
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--foreground-muted));
+  }
+
+  /* Selection styling */
+  ::selection {
+    background: hsl(var(--primary) / 0.3);
+    color: hsl(var(--foreground));
+  }
+
+  /* Message content typography */
+  .prose-message {
+    font-family:
+      'DM Sans',
+      'Noto Sans KR',
+      system-ui,
+      -apple-system,
+      sans-serif;
+    line-height: 1.6;
+    letter-spacing: -0.01em;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  /* Premium focus states */
+  *:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+}
+
+/* Animations */
+@layer utilities {
+  /* Staggered entrance animation */
+  .animate-in {
+    animation: animate-in 0.4s ease-out forwards;
+    opacity: 0;
+  }
+
+  @keyframes animate-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Fade in up - for cards */
+  .animate-fade-in-up {
+    animation: fade-in-up 0.5s ease-out forwards;
+    opacity: 0;
+  }
+
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Slide in from left - for sidebar */
+  .animate-slide-in-left {
+    animation: slide-in-left 0.3s ease-out forwards;
+  }
+
+  @keyframes slide-in-left {
+    from {
+      opacity: 0;
+      transform: translateX(-16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  /* Pulse glow - for active states */
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite;
+  }
+
+  @keyframes glow {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 hsl(var(--primary) / 0);
+    }
+    50% {
+      box-shadow: 0 0 20px 0 hsl(var(--primary) / 0.3);
+    }
+  }
+
+  /* Shimmer loading effect */
+  .animate-shimmer {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 0%,
+      hsl(var(--accent)) 50%,
+      hsl(var(--muted)) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+
+  /* Gradient border effect */
+  .gradient-border {
+    position: relative;
+    background: hsl(var(--card));
+    border-radius: var(--radius);
+  }
+
+  .gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    background: linear-gradient(
+      135deg,
+      hsl(var(--border-highlight)),
+      hsl(var(--border)) 50%,
+      hsl(var(--border-highlight))
+    );
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* Glass effect */
+  .glass {
+    background: hsl(var(--card) / 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  /* Chat type indicator colors */
+  .chat-channel {
+    --chat-color: var(--chat-channel);
+  }
+  .chat-group {
+    --chat-color: var(--chat-group);
+  }
+  .chat-supergroup {
+    --chat-color: var(--chat-supergroup);
+  }
+  .chat-private {
+    --chat-color: var(--chat-private);
+  }
+
+  /* Delay utilities for staggered animations */
+  .delay-75 {
+    animation-delay: 75ms;
+  }
+  .delay-100 {
+    animation-delay: 100ms;
+  }
+  .delay-150 {
+    animation-delay: 150ms;
+  }
+  .delay-200 {
+    animation-delay: 200ms;
+  }
+  .delay-300 {
+    animation-delay: 300ms;
+  }
+  .delay-400 {
+    animation-delay: 400ms;
+  }
+  .delay-500 {
+    animation-delay: 500ms;
+  }
+}

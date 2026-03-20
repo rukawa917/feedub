@@ -1,0 +1,519 @@
+/**
+ * Insights Page - Main LLM Insights Interface
+ *
+ * Features:
+ * - Two-tab interface: Generate New / History
+ * - Usage quota indicator in header
+ * - Consent flow for first-time users
+ * - Rate limiting banner when quota exhausted
+ * - Paginated insight history
+ * - Navigation to detail view
+ *
+ * States:
+ * 1. First visit (no consent): Show onboarding
+ * 2. Has consent, Generate tab: Show generator form
+ * 3. Has consent, History tab: Show insight list or empty state
+ * 4. Quota exhausted: Show rate limit banner instead of form
+ */
+
+import { useState, useCallback, useEffect } from 'react'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
+import { ArrowLeft, Sparkles, Clock, History as HistoryIcon, Settings } from 'lucide-react'
+import { FeedubIcon } from '../components/common/FeedubIcon'
+import { ThemeToggle } from '../components/common/ThemeToggle'
+import { LogoutButton } from '../components/auth/LogoutButton'
+import { ConsentDialog } from '../components/insights/ConsentDialog'
+import { UsageIndicator } from '../components/insights/UsageIndicator'
+import { InsightOnboarding } from '../components/insights/InsightOnboarding'
+import { InsightGenerator } from '../components/insights/InsightGenerator'
+import { InsightCard, InsightHistoryEmpty } from '../components/insights/InsightCard'
+import { InsightDetail } from '../components/insights/InsightDetail'
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { useInsightsConsent } from '../hooks/useInsightsConsent'
+import { useInsightsUsage } from '../hooks/useInsightsUsage'
+import { useInsightHistory } from '../hooks/useInsightHistory'
+import { useAuthStore } from '../stores/auth'
+import { useToast } from '../contexts/ToastContext'
+import { getInsightDetail } from '../services/insights-service'
+import type { InsightDetail as InsightDetailType } from '../types/insights'
+import type { InsightsLocationState } from '../types/filters'
+import { cn } from '@/lib/utils'
+
+type TabId = 'generate' | 'history'
+
+export function Insights() {
+  const navigate = useNavigate()
+  const { insightId } = useParams<{ insightId: string }>()
+  const location = useLocation()
+  const locationState = location.state as InsightsLocationState | undefined
+  const hasMessageIds = locationState?.messageIds && locationState.messageIds.length > 0
+  const user = useAuthStore((state) => state.user)
+  const token = useAuthStore((state) => state.token)
+  const { showToast } = useToast()
+
+  // Hooks
+  const {
+    consentStatus,
+    isLoading: isLoadingConsent,
+    needsConsent,
+    giveConsent,
+    revokeConsent,
+  } = useInsightsConsent()
+
+  const {
+    usage,
+    isLoading: isLoadingUsage,
+    canGenerate,
+    resetTimeFormatted,
+    refetch: refetchUsage,
+  } = useInsightsUsage()
+
+  const {
+    insights,
+    total: totalInsights,
+    isLoading: isLoadingHistory,
+    hasMore,
+    loadNextPage,
+    refetch: refetchHistory,
+  } = useInsightHistory()
+
+  // Fetch insight detail when insightId is present
+  const [insightDetail, setInsightDetail] = useState<InsightDetailType | null>(null)
+  const [isLoadingDetail, setIsLoadingDetail] = useState(false)
+
+  useEffect(() => {
+    if (!token || !insightId) {
+      setInsightDetail(null)
+      return
+    }
+
+    let cancelled = false
+    setIsLoadingDetail(true)
+
+    getInsightDetail(insightId)
+      .then((data) => {
+        if (!cancelled) {
+          setInsightDetail(data)
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          console.error('Failed to fetch insight detail:', err)
+          setInsightDetail(null)
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setIsLoadingDetail(false)
+        }
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [token, insightId])
+
+  // Local state
+  const [activeTab, setActiveTabState] = useState<TabId>('generate')
+
+  // Tab change with scroll reset
+  const setActiveTab = useCallback((tab: TabId) => {
+    setActiveTabState(tab)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [])
+  const [showConsentDialog, setShowConsentDialog] = useState(false)
+  const [isConsentLoading, setIsConsentLoading] = useState(false)
+  const [showRevokeDialog, setShowRevokeDialog] = useState(false)
+  const [isRevokeLoading, setIsRevokeLoading] = useState(false)
+
+  // Handle navigation
+  const handleBackToDashboard = useCallback(() => {
+    navigate('/dashboard')
+  }, [navigate])
+
+  const handleBackToInsights = useCallback(() => {
+    navigate('/insights')
+  }, [navigate])
+
+  const handleInsightClick = useCallback(
+    (insightId: string) => {
+      navigate(`/insights/${insightId}`)
+    },
+    [navigate]
+  )
+
+  // Handle onboarding "Get Started" click
+  const handleGetStarted = useCallback(() => {
+    setShowConsentDialog(true)
+  }, [])
+
+  // Handle consent given
+  const handleConsent = useCallback(async () => {
+    setIsConsentLoading(true)
+    try {
+      await giveConsent()
+      setShowConsentDialog(false)
+      refetchUsage()
+    } catch (err) {
+      console.error('Failed to give consent:', err)
+    } finally {
+      setIsConsentLoading(false)
+    }
+  }, [giveConsent, refetchUsage])
+
+  // Handle consent declined
+  const handleDeclineConsent = useCallback(() => {
+    setShowConsentDialog(false)
+  }, [])
+
+  // Handle revoke consent
+  const handleRevokeConsent = useCallback(async () => {
+    setIsRevokeLoading(true)
+    try {
+      await revokeConsent()
+      setShowRevokeDialog(false)
+      refetchUsage()
+      refetchHistory()
+      showToast('Consent revoked. All insights have been deleted.', { variant: 'success' })
+    } catch (err) {
+      console.error('Failed to revoke consent:', err)
+      showToast('Failed to revoke consent. Please try again.', { variant: 'error' })
+    } finally {
+      setIsRevokeLoading(false)
+    }
+  }, [revokeConsent, refetchUsage, refetchHistory, showToast])
+
+  // Handle "Generate First Insight" from empty history
+  const handleGenerateFirst = useCallback(() => {
+    setActiveTab('generate')
+  }, [])
+
+  // After generation completes, refresh history and optionally switch tab
+  const handleGenerationComplete = useCallback(() => {
+    refetchHistory()
+    refetchUsage()
+    // Optionally switch to history tab to show new insight
+    // setActiveTab('history')
+  }, [refetchHistory, refetchUsage])
+
+  // Determine if onboarding should be shown
+  const showOnboarding = needsConsent && activeTab === 'generate' && !isLoadingConsent
+
+  // Determine if rate limit banner should be shown
+  const showRateLimitBanner = !canGenerate && usage && !needsConsent && activeTab === 'generate'
+
+  // If viewing a specific insight detail, render the detail view
+  if (insightId) {
+    return (
+      <InsightDetail
+        insight={insightDetail || null}
+        isLoading={isLoadingDetail}
+        onBack={handleBackToInsights}
+      />
+    )
+  }
+
+  return (
+    <div className="min-h-screen">
+      {/* Header - Glass effect sticky header */}
+      <header className="glass border-b border-border/50 sticky top-0 z-30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            {/* Brand */}
+            <div className="flex items-center gap-3">
+              <FeedubIcon size={40} className="rounded-xl shadow-glow-sm" />
+              <div>
+                <h1 className="text-xl font-bold tracking-tight text-foreground">AI Insights</h1>
+                {user && (
+                  <p className="text-xs text-foreground-muted">
+                    {user.phone?.replace(/(\+\d{2})\d+(\d{4})/, '$1••••$2')}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-2">
+              {/* Usage Indicator */}
+              <UsageIndicator usage={usage} isLoading={isLoadingUsage} className="hidden sm:flex" />
+
+              {/* Settings dropdown - only show if user has consent */}
+              {!needsConsent && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="Settings">
+                      <Settings className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      onClick={() => setShowRevokeDialog(true)}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      Revoke Consent
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+
+              {/* Theme toggle */}
+              <ThemeToggle iconOnly />
+
+              {/* Logout button */}
+              <LogoutButton iconOnly />
+            </div>
+          </div>
+
+          {/* Mobile usage indicator */}
+          <div className="sm:hidden mt-3">
+            <UsageIndicator usage={usage} isLoading={isLoadingUsage} />
+          </div>
+        </div>
+      </header>
+
+      {/* Main content */}
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Back button */}
+        <button
+          onClick={handleBackToDashboard}
+          className="group mb-6 flex items-center gap-2 text-sm text-foreground-muted hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+          Back to Dashboard
+        </button>
+
+        {/* Tab Navigation */}
+        <div className="mb-6 flex items-center gap-2 border-b border-border">
+          <button
+            onClick={() => setActiveTab('generate')}
+            className={cn(
+              'px-4 py-2.5 text-sm font-medium rounded-t-lg transition-all duration-200 border-b-2',
+              activeTab === 'generate'
+                ? 'text-foreground border-primary bg-primary/5'
+                : 'text-foreground-muted border-transparent hover:text-foreground hover:bg-accent/50'
+            )}
+          >
+            <span className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4" />
+              Generate New
+            </span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('history')}
+            className={cn(
+              'px-4 py-2.5 text-sm font-medium rounded-t-lg transition-all duration-200 border-b-2',
+              activeTab === 'history'
+                ? 'text-foreground border-primary bg-primary/5'
+                : 'text-foreground-muted border-transparent hover:text-foreground hover:bg-accent/50'
+            )}
+          >
+            <span className="flex items-center gap-2">
+              <HistoryIcon className="h-4 w-4" />
+              History
+              {totalInsights > 0 && (
+                <span className="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-foreground-muted/20 font-mono">
+                  {totalInsights}
+                </span>
+              )}
+            </span>
+          </button>
+        </div>
+
+        {/* Tab Content */}
+        <div className="gradient-border animate-fade-in-up">
+          <div className="rounded-xl bg-card p-6">
+            {/* Generate Tab */}
+            {activeTab === 'generate' && (
+              <>
+                {/* Onboarding - First-time users */}
+                {showOnboarding ? (
+                  <InsightOnboarding onGetStarted={handleGetStarted} />
+                ) : showRateLimitBanner ? (
+                  /* Rate limit banner - Quota exhausted */
+                  <div className="flex flex-col items-center justify-center p-8 sm:p-12 text-center animate-fade-in-up">
+                    {/* Clock icon */}
+                    <div className="mb-6 w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/30 flex items-center justify-center">
+                      <Clock className="h-8 w-8 text-amber-500 animate-pulse" />
+                    </div>
+
+                    {/* Title */}
+                    <h3 className="text-2xl font-bold text-foreground mb-3">Daily Limit Reached</h3>
+
+                    {/* Message */}
+                    <p className="text-foreground-muted mb-2 max-w-md leading-relaxed">
+                      You've used {usage.used_today}/{usage.daily_limit} insights today.
+                    </p>
+                    <p className="text-foreground-muted mb-8 max-w-md leading-relaxed">
+                      New insights available {resetTimeFormatted}.
+                    </p>
+
+                    {/* Tip */}
+                    <div className="rounded-lg bg-secondary/50 border border-border p-4 mb-6 max-w-md">
+                      <p className="text-sm text-foreground-muted">
+                        💡 Tip: View your previous insights in the History tab while you wait.
+                      </p>
+                    </div>
+
+                    {/* CTA Button */}
+                    <Button
+                      onClick={() => setActiveTab('history')}
+                      variant="outline"
+                      size="lg"
+                      className="gap-2"
+                    >
+                      View History
+                      <ArrowLeft className="h-4 w-4 rotate-180" />
+                    </Button>
+                  </div>
+                ) : hasMessageIds ? (
+                  /* Generator form - Normal state */
+                  <InsightGenerator
+                    messageIds={locationState!.messageIds}
+                    dateRange={locationState!.dateRange}
+                    channelTitles={locationState!.channelTitles}
+                    onGenerationComplete={handleGenerationComplete}
+                  />
+                ) : (
+                  /* No messages selected */
+                  <NoMessagesSelected onGoToDashboard={handleBackToDashboard} />
+                )}
+              </>
+            )}
+
+            {/* History Tab */}
+            {activeTab === 'history' && (
+              <>
+                {isLoadingHistory && insights.length === 0 ? (
+                  /* Loading state */
+                  <div className="flex flex-col items-center justify-center p-12 text-center">
+                    <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary mb-4" />
+                    <p className="text-sm text-foreground-muted">Loading insights...</p>
+                  </div>
+                ) : insights.length === 0 ? (
+                  /* Empty state */
+                  <InsightHistoryEmpty onGenerateFirst={handleGenerateFirst} />
+                ) : (
+                  /* Insight list */
+                  <div className="space-y-4">
+                    {/* List header */}
+                    <div className="flex items-center justify-between pb-2 border-b border-border">
+                      <h3 className="text-lg font-semibold text-foreground">Your Insights</h3>
+                      <span className="text-sm text-foreground-muted font-mono">
+                        {totalInsights} total
+                      </span>
+                    </div>
+
+                    {/* Insight cards */}
+                    <div className="space-y-3">
+                      {insights.map((insight) => (
+                        <InsightCard
+                          key={insight.id}
+                          insight={insight}
+                          onClick={handleInsightClick}
+                        />
+                      ))}
+                    </div>
+
+                    {/* Load More button */}
+                    {hasMore && (
+                      <div className="flex justify-center pt-4">
+                        <Button
+                          onClick={loadNextPage}
+                          variant="outline"
+                          disabled={isLoadingHistory}
+                          className="gap-2"
+                        >
+                          {isLoadingHistory ? (
+                            <>
+                              <div className="h-4 w-4 animate-spin rounded-full border-2 border-border border-t-primary" />
+                              Loading...
+                            </>
+                          ) : (
+                            <>Load More</>
+                          )}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      </main>
+
+      {/* Consent Dialog */}
+      {showConsentDialog && consentStatus && (
+        <ConsentDialog
+          isOpen={showConsentDialog}
+          isReConsent={consentStatus.requires_re_consent}
+          currentVersion={consentStatus.current_version}
+          onConsent={handleConsent}
+          onDecline={handleDeclineConsent}
+          isLoading={isConsentLoading}
+        />
+      )}
+
+      {/* Revoke Consent Alert Dialog */}
+      <AlertDialog open={showRevokeDialog} onOpenChange={setShowRevokeDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Revoke Consent?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete all your generated insights and prevent future AI
+              analysis of your feedback data. You can re-enable insights at any time, but previous
+              insights cannot be recovered.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isRevokeLoading}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleRevokeConsent}
+              disabled={isRevokeLoading}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isRevokeLoading ? 'Revoking...' : 'Revoke Consent'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  )
+}
+
+function NoMessagesSelected({ onGoToDashboard }: { onGoToDashboard: () => void }) {
+  return (
+    <div className="flex flex-col items-center justify-center p-8 sm:p-12 text-center animate-fade-in-up">
+      <div className="mb-6 w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/30 flex items-center justify-center">
+        <Sparkles className="h-8 w-8 text-primary" />
+      </div>
+      <h3 className="text-2xl font-bold text-foreground mb-3">Select Messages to Analyze</h3>
+      <p className="text-foreground-muted mb-8 max-w-md leading-relaxed">
+        Apply filters on the Dashboard to select which messages you want to analyze with AI.
+      </p>
+      <Button onClick={onGoToDashboard} className="gap-2">
+        Go to Dashboard
+        <ArrowLeft className="h-4 w-4 rotate-180" />
+      </Button>
+    </div>
+  )
+}
+
+export default Insights

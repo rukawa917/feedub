@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- Concept 1: Convergent Streams
+       Three flowing streams converging into one - represents message aggregation
+       Color: Coral/Salmon gradient - distinctive, warm, memorable -->
+  <defs>
+    <linearGradient id="coral-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF6B6B"/>
+      <stop offset="100%" stop-color="#FF8E53"/>
+    </linearGradient>
+    <linearGradient id="coral-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E55A5A"/>
+      <stop offset="100%" stop-color="#E57D47"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="96" fill="url(#coral-grad)"/>
+
+  <!-- Three converging streams forming an abstract "aggregation" symbol -->
+  <!-- Top stream -->
+  <path d="M100 140 Q180 140 220 200 Q260 260 300 280 L360 280"
+        stroke="white" stroke-width="36" stroke-linecap="round" fill="none" opacity="0.9"/>
+
+  <!-- Middle stream (main) -->
+  <path d="M100 256 Q200 256 280 280 L400 280"
+        stroke="white" stroke-width="44" stroke-linecap="round" fill="none"/>
+
+  <!-- Bottom stream -->
+  <path d="M100 372 Q180 372 220 320 Q260 268 300 280 L360 280"
+        stroke="white" stroke-width="36" stroke-linecap="round" fill="none" opacity="0.9"/>
+
+  <!-- Focal point / collection indicator -->
+  <circle cx="400" cy="280" r="28" fill="white"/>
+  <circle cx="400" cy="280" r="14" fill="url(#coral-dark)"/>
+</svg>
