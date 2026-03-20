@@ -64,24 +64,6 @@ npm run test:e2e:smoke
 npm run test:e2e:chromium
 ```
 
-## Makefile Commands
-
-From the project root:
-
-```bash
-# Run E2E tests
-make frontend-test-e2e
-
-# Run in headed mode
-make frontend-test-e2e-headed
-
-# Run with Playwright UI
-make frontend-test-e2e-ui
-
-# Run smoke tests only
-make frontend-test-e2e-smoke
-```
-
 ## Writing New Tests
 
 ### Basic Template

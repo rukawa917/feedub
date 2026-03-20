@@ -62,8 +62,11 @@ npm run format                # Prettier
 npm run lint:fix              # ESLint
 npm run type-check            # TypeScript
 
-# Or simply:
-make lint && make test
+# Run all backend tests
+cd backend && uv run pytest tests/ -v
+
+# Run all frontend tests
+cd frontend && npx vitest run
 ```
 
 ---
@@ -75,7 +78,7 @@ make lint && make test
 cd backend
 uv run pytest tests/unit/ -v         # Unit (fast, mocked)
 uv run pytest tests/contract/ -v     # Contract (API shape)
-uv run pytest tests/integration/ -v  # Integration (needs Docker: make db-up)
+uv run pytest tests/integration/ -v  # Integration tests
 uv run pytest tests/ -v              # All
 
 # Frontend
@@ -83,8 +86,7 @@ cd frontend
 npm test                              # Vitest (unit + component)
 npm run test:e2e                      # Playwright (needs npm run dev)
 
-# Full suite
-make test
+# Full suite: run backend then frontend tests separately
 ```
 
 - Backend: `pytest-asyncio` with `asyncio_mode = "auto"` (no `@pytest.mark.asyncio` needed)
@@ -161,7 +163,7 @@ feedub_v2/
 │   ├── architecture/                #   System overview, data flows, ADRs (decisions/)
 │   └── qa/                          #   QA scenarios: auth, channels, messages, filtering, export
 │
-└── Makefile                         # Unified workflow: make setup/dev/test/lint
+└── CLAUDE.md                        # AI agent instructions
 ```
 
 ---

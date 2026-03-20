@@ -51,21 +51,9 @@ The CLI manages the backend and frontend processes, backups, upgrades, and confi
 git clone https://github.com/rukawa917/feedub.git
 cd feedub
 
-# One-command setup
-make setup    # Installs deps, initializes SQLite DB, runs migrations
-
-# Start development
-make dev      # Backend on :8000, Frontend on :5173
-```
-
-Or manually:
-
-```bash
-# Configure environment
-cp .env.example .env   # Edit with your Telegram API keys
-
 # Backend
 cd backend
+cp .env.example .env   # Edit with your Telegram API keys
 uv sync --extra dev
 uv run alembic upgrade head
 uv run uvicorn src.main:app --reload
@@ -165,11 +153,8 @@ uv run pytest tests/ -v            # All tests
 
 # Frontend
 cd frontend
-npm test                           # Unit tests (Vitest)
+npx vitest run                     # Unit tests (Vitest)
 npm run test:e2e                   # E2E tests (Playwright)
-
-# Everything
-make test
 ```
 
 ---

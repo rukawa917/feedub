@@ -108,7 +108,44 @@ def run_cmd(no_open: bool = False) -> None:
 
     proc_env = {**os.environ, **env}
 
-    # 6. Start backend
+    # 6. Install dependencies & run migrations
+    console.print("[dim]Installing backend dependencies...[/dim]")
+    dep_result = subprocess.run(
+        ["uv", "sync"],
+        cwd=backend_dir,
+        capture_output=True,
+        text=True,
+        env=proc_env,
+    )
+    if dep_result.returncode != 0:
+        error(f"Failed to install backend dependencies:\n{dep_result.stderr}")
+        raise SystemExit(1)
+
+    console.print("[dim]Installing frontend dependencies...[/dim]")
+    dep_result = subprocess.run(
+        ["npm", "install"],
+        cwd=frontend_dir,
+        capture_output=True,
+        text=True,
+        env=proc_env,
+    )
+    if dep_result.returncode != 0:
+        error(f"Failed to install frontend dependencies:\n{dep_result.stderr}")
+        raise SystemExit(1)
+
+    console.print("[dim]Running database migrations...[/dim]")
+    migrate_result = subprocess.run(
+        ["uv", "run", "alembic", "upgrade", "head"],
+        cwd=backend_dir,
+        capture_output=True,
+        text=True,
+        env=proc_env,
+    )
+    if migrate_result.returncode != 0:
+        error(f"Database migration failed:\n{migrate_result.stderr}")
+        raise SystemExit(1)
+
+    # 7. Start backend
     console.print("[dim]Starting backend...[/dim]")
     backend_log = open(LOG_DIR / "backend.log", "a")
     backend_proc = subprocess.Popen(
@@ -120,7 +157,7 @@ def run_cmd(no_open: bool = False) -> None:
     )
     write_pid(backend_pid_file, backend_proc.pid)
 
-    # 7. Start frontend
+    # 8. Start frontend
     console.print("[dim]Starting frontend...[/dim]")
     frontend_log = open(LOG_DIR / "frontend.log", "a")
     frontend_proc = subprocess.Popen(
@@ -132,7 +169,7 @@ def run_cmd(no_open: bool = False) -> None:
     )
     write_pid(frontend_pid_file, frontend_proc.pid)
 
-    # 8. Wait for backend health
+    # 9. Wait for backend health
     with Progress(
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
@@ -149,10 +186,10 @@ def run_cmd(no_open: bool = False) -> None:
         )
         raise SystemExit(1)
 
-    # 9. Success
+    # 10. Success
     success(f"Feedub is running at [link={FRONTEND_URL}]{FRONTEND_URL}[/link]")
 
-    # 10. Open browser
+    # 11. Open browser
     if not no_open:
         try:
             webbrowser.open(FRONTEND_URL)

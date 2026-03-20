@@ -15,17 +15,12 @@ Thanks for your interest in contributing! This guide will help you get started.
 ```bash
 git clone https://github.com/rukawa917/feedub.git
 cd feedub
-make setup    # Installs deps, starts DB, runs migrations
-make dev      # Backend on :8000, Frontend on :5173
-```
 
-### Manual Setup
-
-```bash
 # Backend
 cd backend
 cp .env.example .env   # Edit with your Telegram API keys
 uv sync --extra dev
+uv run alembic upgrade head   # Run migrations (SQLite, no Docker needed)
 cd ..
 
 # Frontend
@@ -33,9 +28,6 @@ cd frontend
 cp .env.example .env
 npm install
 cd ..
-
-# Database
-make db-migrate        # Run migrations (SQLite, no Docker needed)
 ```
 
 See [docs/self-hosting.md](./docs/self-hosting.md) for the self-hosting guide.
@@ -70,13 +62,6 @@ See [AGENTS.md](./AGENTS.md) for full architecture conventions.
 All checks must pass before submitting a PR:
 
 ```bash
-make lint    # Format, lint, and type-check both backend and frontend
-make test    # Run all tests
-```
-
-Or run them separately:
-
-```bash
 # Backend
 cd backend
 uv run ruff format .
@@ -89,7 +74,7 @@ cd frontend
 npm run format
 npm run lint:fix
 npm run type-check
-npm test run
+npx vitest run
 ```
 
 ### Testing
@@ -105,7 +90,8 @@ We follow TDD — write tests before (or alongside) implementation.
 After modifying SQLAlchemy models:
 
 ```bash
-make db-migration-create MSG="describe the change"
+cd backend
+uv run alembic revision --autogenerate -m "describe the change"
 ```
 
 Review the generated migration in `backend/alembic/versions/` before committing.
@@ -114,7 +100,7 @@ Review the generated migration in `backend/alembic/versions/` before committing.
 
 1. Create a feature branch from `main`
 2. Make your changes with tests
-3. Run `make lint && make test`
+3. Run linting and tests (see Quality Gates above)
 4. Push and open a PR against `main`
 5. Fill out the PR template — describe what changed and why
 6. Wait for review

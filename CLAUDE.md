@@ -5,12 +5,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-# Setup & Development
-make setup              # One-time: install deps, initialize SQLite DB, run migrations
-make dev                # Start backend (:8000) + frontend (:5173) in parallel
+# User CLI (primary interface)
+pip install ./cli        # Install the feedub CLI
+feedub init              # Setup wizard: detect project root, generate config
+feedub run               # Start backend (:8000) + frontend (:5173)
+feedub stop              # Stop all services
+feedub status            # Show service health
+feedub logs [service]    # Tail logs
+
+# Setup (development)
+cd backend && uv sync --extra dev           # Install backend deps
+cd backend && uv run alembic upgrade head   # Run database migrations
+cd frontend && npm install                  # Install frontend deps
 
 # Testing
-make test               # All backend + frontend tests
 cd backend && uv run pytest tests/unit/ -v              # Backend unit tests only
 cd backend && uv run pytest tests/unit/test_foo.py -v   # Single backend test file
 cd backend && uv run pytest tests/unit/test_foo.py::TestClass::test_name -v  # Single test
@@ -22,13 +30,12 @@ cd frontend && npm run test:e2e                          # Playwright E2E (needs
 # pkill -f vitest
 
 # Linting & Formatting
-make lint               # Lint + format + type-check both
 cd backend && uv run ruff format . && uv run ruff check . --fix && uv run ty check
 cd frontend && npm run format && npm run lint:fix && npm run type-check
 
 # Database
-make db-migrate         # Run Alembic migrations (SQLite, no Docker needed)
-make db-migration-create MSG="description"  # Create new migration after model changes
+cd backend && uv run alembic upgrade head                        # Run migrations
+cd backend && uv run alembic revision --autogenerate -m "description"  # Create new migration
 ```
 
 ## Package Managers
