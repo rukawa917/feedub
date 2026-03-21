@@ -2,12 +2,13 @@
 
 import logging
 import time
-from datetime import UTC, datetime
+from datetime import datetime
 from uuid import UUID
+
+import litellm
 
 from src.core.config import get_settings
 from src.core.exceptions import (
-    ConsentRequiredError,
     InsightGenerationError,
     MessageLimitExceededError,
 )
@@ -20,8 +21,27 @@ from src.schemas.insights import SUPPORTED_LANGUAGES
 
 logger = logging.getLogger(__name__)
 
-# Constants
-TOKENS_PER_MESSAGE_ESTIMATE = 60  # Average tokens per message
+# Hard cap on DB fetch to avoid loading unbounded rows.
+# Real token-based truncation happens after formatting.
+MAX_MESSAGES_DB_FETCH = 5000
+
+DEFAULT_MAX_INPUT_TOKENS = 128_000
+MAX_OUTPUT_TOKENS = 16384
+
+
+def _get_model_max_input_tokens(model: str) -> int:
+    """Get max input tokens for a model via litellm, with fallback."""
+    try:
+        info = litellm.get_model_info(model)
+        max_input = info.get("max_input_tokens") or info.get("max_tokens")
+        if max_input:
+            return int(max_input)
+    except Exception:
+        logger.warning(
+            f"Could not get model info for {model}, "
+            f"using default {DEFAULT_MAX_INPUT_TOKENS} max input tokens"
+        )
+    return DEFAULT_MAX_INPUT_TOKENS
 
 
 class InsightsService:
@@ -34,32 +54,6 @@ class InsightsService:
     ):
         self.message_repo = message_repo
         self.insights_repo = insights_repo
-
-    @property
-    def max_messages(self) -> int:
-        """Derive max messages from llm_max_input_tokens setting."""
-        return get_settings().llm_max_input_tokens // TOKENS_PER_MESSAGE_ESTIMATE
-
-    # =========================================================================
-    # Consent Management
-    # =========================================================================
-
-    async def give_consent(self, user_id: UUID) -> None:
-        """Set llm_consent_given=True for the user."""
-        await self.insights_repo.set_consent(user_id, True)
-
-    async def revoke_consent(self, user_id: UUID) -> None:
-        """Set llm_consent_given=False for the user."""
-        await self.insights_repo.set_consent(user_id, False)
-
-    async def check_consent(self, user_id: UUID) -> tuple[bool, str | None, str, bool]:
-        """Check if user has given LLM consent.
-
-        Returns:
-            Tuple of (has_consent, consent_version, current_version, requires_re_consent)
-        """
-        has_consent = await self.insights_repo.get_consent(user_id)
-        return has_consent, None, "1.0", False
 
     # =========================================================================
     # Validation
@@ -77,33 +71,29 @@ class InsightsService:
         Returns:
             Tuple of (valid, message_count, exceeds_limit, estimated_tokens, suggested_filters)
         """
-        max_msgs = self.max_messages
-
         # Count messages for the filters
         messages = await self.message_repo.get_messages_for_insights(
             user_id=user_id,
             chat_ids=chat_ids,
             start_date=start_date,
             end_date=end_date,
-            limit=max_msgs + 1,  # Fetch one extra to check if exceeds
+            limit=MAX_MESSAGES_DB_FETCH + 1,
         )
 
         message_count = len(messages)
-        exceeds_limit = message_count > max_msgs
-        estimated_tokens = min(message_count, max_msgs) * TOKENS_PER_MESSAGE_ESTIMATE
+        exceeds_limit = message_count > MAX_MESSAGES_DB_FETCH
 
         suggested_filters = None
         if exceeds_limit:
-            # Suggest narrower date range
             suggested_filters = {
                 "suggestion": "Please narrow your date range or select fewer channels",
                 "message_count": message_count,
-                "max_allowed": max_msgs,
+                "max_allowed": MAX_MESSAGES_DB_FETCH,
             }
 
         valid = not exceeds_limit and message_count > 0
 
-        return valid, message_count, exceeds_limit, estimated_tokens, suggested_filters
+        return valid, message_count, exceeds_limit, None, suggested_filters
 
     # =========================================================================
     # Generation
@@ -146,24 +136,57 @@ class InsightsService:
         try:
             logger.info(f"{log_prefix} for user {user_id}: {len(messages)} messages")
 
-            # Format for LLM (pass messages directly without cluster deduplication)
-            user_content = format_messages_for_llm(messages)
-
             # Update status to generating
             await self.insights_repo.update_insight_status(insight.id, "generating")
-
-            # Call LLM
-            start_time = time.time()
 
             # Get language name for prompt
             language_name = SUPPORTED_LANGUAGES.get(language, "English")
             system_prompt = get_insights_system_prompt(language, language_name)
 
-            messages = [
+            # Get model's context window from litellm
+            model_max_input = _get_model_max_input_tokens(settings.llm_model)
+            max_input = model_max_input - MAX_OUTPUT_TOKENS
+
+            # Format messages and truncate to fit within token budget
+            user_content = format_messages_for_llm(messages)
+            llm_messages = [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_content},
             ]
-            response = await llm_complete(messages=messages, max_tokens=16384)
+
+            token_count = litellm.token_counter(
+                model=settings.llm_model, messages=llm_messages
+            )
+            logger.info(
+                f"{log_prefix}: estimated {token_count} input tokens "
+                f"(limit {max_input}, model max {model_max_input}) "
+                f"from {len(messages)} messages"
+            )
+
+            # Truncate oldest messages until we fit within the token budget
+            while token_count > max_input and len(messages) > 10:
+                # Drop the oldest 10% of messages
+                drop = max(1, len(messages) // 10)
+                messages = messages[drop:]
+                user_content = format_messages_for_llm(messages)
+                llm_messages[1]["content"] = user_content
+                token_count = litellm.token_counter(
+                    model=settings.llm_model, messages=llm_messages
+                )
+                logger.info(
+                    f"{log_prefix}: truncated to {len(messages)} messages, "
+                    f"{token_count} tokens"
+                )
+
+            if token_count > max_input:
+                raise InsightGenerationError(
+                    f"Input too large even after truncation: "
+                    f"{token_count} tokens exceeds {max_input} limit"
+                )
+
+            # Call LLM
+            start_time = time.time()
+            response = await llm_complete(messages=llm_messages, max_tokens=MAX_OUTPUT_TOKENS)
 
             # Update model info from response
             insight.model_used = response.model
@@ -207,42 +230,21 @@ class InsightsService:
         """Generate insight (non-streaming).
 
         This method:
-        1. Validates consent
-        2. Fetches messages (single fetch, no double-fetch)
-        3. Calls LLM for completion
-        4. Stores and returns the result
+        1. Fetches messages (single fetch, no double-fetch)
+        2. Calls LLM for completion (with auto-truncation to fit context window)
+        3. Stores and returns the result
         """
-        # Check consent
-        has_consent, _, _, _ = await self.check_consent(user_id)
-        if not has_consent:
-            raise ConsentRequiredError("User consent required for insights")
-
-        max_msgs = self.max_messages
-
-        # Fetch messages ONCE (eliminates double-fetch from validate_request + generate)
+        # Fetch messages ONCE
         messages = await self.message_repo.get_messages_for_insights(
             user_id=user_id,
             chat_ids=chat_ids,
             start_date=start_date,
             end_date=end_date,
-            limit=max_msgs + 1,  # Fetch one extra to check if exceeds limit
+            limit=MAX_MESSAGES_DB_FETCH,
         )
 
-        # Validate based on fetched messages
-        message_count = len(messages)
-        exceeds_limit = message_count > max_msgs
-
-        if exceeds_limit:
-            raise MessageLimitExceededError(
-                f"Request exceeds {max_msgs} message limit",
-                count=message_count,
-                limit=max_msgs,
-            )
-        if message_count == 0:
+        if len(messages) == 0:
             raise InsightGenerationError("No messages found for the specified filters")
-
-        # Trim to max if we fetched the extra check message
-        messages = messages[:max_msgs]
 
         return await self._generate_insight_core(
             user_id=user_id,
@@ -264,34 +266,19 @@ class InsightsService:
         """Generate insight from specific message IDs (non-streaming).
 
         This method:
-        1. Validates consent
-        2. Fetches messages by IDs
-        3. Extracts chat_ids and date range from fetched messages
-        4. Calls LLM for completion
-        5. Stores and returns the result
+        1. Fetches messages by IDs
+        2. Extracts chat_ids and date range from fetched messages
+        3. Calls LLM for completion (with auto-truncation to fit context window)
+        4. Stores and returns the result
         """
-        # Check consent
-        has_consent, _, _, _ = await self.check_consent(user_id)
-        if not has_consent:
-            raise ConsentRequiredError("User consent required for insights")
-
         # Fetch messages by IDs
         messages = await self.message_repo.get_messages_by_ids(
             user_id=user_id,
             message_ids=message_ids,
         )
 
-        # Validate based on fetched messages
-        max_msgs = self.max_messages
-        message_count = len(messages)
-        if message_count == 0:
+        if len(messages) == 0:
             raise InsightGenerationError("No messages found for the specified IDs")
-        if message_count > max_msgs:
-            raise MessageLimitExceededError(
-                f"Request exceeds {max_msgs} message limit",
-                count=message_count,
-                limit=max_msgs,
-            )
 
         # Extract chat_ids and date range from fetched messages
         chat_ids = list({m.chat_id for m in messages})

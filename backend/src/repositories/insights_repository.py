@@ -11,7 +11,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.retry import db_retry
 from src.models.insight import Insight
-from src.models.user import User
 
 
 class InsightsRepository:
@@ -28,40 +27,6 @@ class InsightsRepository:
             session: SQLAlchemy async session for database operations.
         """
         self.session = session
-
-    # =========================================================================
-    # Consent Operations
-    # =========================================================================
-
-    @db_retry
-    async def get_consent(self, user_id: UUID) -> bool:
-        """Get user's LLM consent status.
-
-        Args:
-            user_id: UUID of the user.
-
-        Returns:
-            True if user has given consent, False otherwise.
-        """
-        stmt = select(User.llm_consent_given).where(User.id == user_id)
-        result = await self.session.execute(stmt)
-        value = result.scalar_one_or_none()
-        return bool(value) if value is not None else False
-
-    @db_retry
-    async def set_consent(self, user_id: UUID, value: bool) -> None:
-        """Set user's LLM consent status.
-
-        Args:
-            user_id: UUID of the user.
-            value: True to give consent, False to revoke.
-        """
-        stmt = select(User).where(User.id == user_id)
-        result = await self.session.execute(stmt)
-        user = result.scalar_one_or_none()
-        if user:
-            user.llm_consent_given = value
-            await self.session.commit()
 
     # =========================================================================
     # Insight Operations

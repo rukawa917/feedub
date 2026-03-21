@@ -8,40 +8,6 @@ from uuid import UUID
 from pydantic import BaseModel, Field, field_validator
 
 # ============================================================================
-# Consent Schemas
-# ============================================================================
-
-
-class ConsentStatusResponse(BaseModel):
-    """Response for user consent status."""
-
-    has_consent: bool
-    consent_version: str | None = None
-    current_version: str
-    requires_re_consent: bool = False
-
-
-class GiveConsentRequest(BaseModel):
-    """Request to give consent."""
-
-    version: str = Field(..., description="Consent version to accept")
-
-
-class GiveConsentResponse(BaseModel):
-    """Response after giving consent."""
-
-    success: bool
-    consent_version: str
-
-
-class RevokeConsentResponse(BaseModel):
-    """Response after revoking consent."""
-
-    success: bool
-    revoked_at: datetime | None = None
-
-
-# ============================================================================
 # Validation Schemas
 # ============================================================================
 
@@ -173,52 +139,6 @@ class InsightListResponse(BaseModel):
 
     insights: list[InsightSummary]
     total: int
-
-
-# ============================================================================
-# Channel AI Consent Schemas
-# ============================================================================
-
-
-class ChannelConsentItem(BaseModel):
-    """Single channel consent entry."""
-
-    chat_id: int
-    chat_title: str | None = None
-
-
-class GrantChannelConsentRequest(BaseModel):
-    """Request to grant AI consent for channels."""
-
-    channels: list[ChannelConsentItem] = Field(
-        ..., description="List of channels to grant AI consent for", min_length=1
-    )
-
-
-class ChannelConsentResponse(BaseModel):
-    """Response for a single channel consent."""
-
-    chat_id: int
-    chat_title: str | None = None
-    consent_given_at: datetime
-    is_active: bool = True
-
-    model_config = {"from_attributes": True}
-
-
-class ChannelConsentListResponse(BaseModel):
-    """Response listing all channel consents."""
-
-    consents: list[ChannelConsentResponse]
-    total: int
-
-
-class RevokeChannelConsentResponse(BaseModel):
-    """Response after revoking channel consent."""
-
-    success: bool
-    chat_id: int
-    revoked_at: datetime
 
 
 # ============================================================================
