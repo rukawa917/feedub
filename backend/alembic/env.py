@@ -1,3 +1,4 @@
+import os
 import sys
 from logging.config import fileConfig
 from pathlib import Path
@@ -23,8 +24,11 @@ from src.models.user_insights_usage import UserInsightsUsage  # noqa: E402, F401
 # This is the Alembic Config object
 config = context.config
 
-# Use sqlite+aiosqlite URL converted to sync sqlite for Alembic
-database_url = config.get_main_option("sqlalchemy.url", "sqlite:///./data/feedub.db")
+# Prefer DATABASE_URL env var (set by feedub CLI), fall back to alembic.ini
+database_url = os.environ.get(
+    "DATABASE_URL",
+    config.get_main_option("sqlalchemy.url", "sqlite:///./data/feedub.db"),
+)
 # Convert async driver to sync for Alembic
 if database_url.startswith("sqlite+aiosqlite://"):
     database_url = database_url.replace("sqlite+aiosqlite://", "sqlite://", 1)
