@@ -9,7 +9,6 @@ from src.core.config import get_settings
 from src.core.exceptions import (
     ConsentRequiredError,
     InsightGenerationError,
-    InsightRateLimitError,
     MessageLimitExceededError,
 )
 from src.llm.prompts import format_messages_for_llm, get_insights_system_prompt
@@ -61,36 +60,6 @@ class InsightsService:
         """
         has_consent = await self.insights_repo.get_consent(user_id)
         return has_consent, None, "1.0", False
-
-    # =========================================================================
-    # Usage Management
-    # =========================================================================
-
-    async def check_usage(self, user_id: UUID) -> tuple[int, int, int, datetime]:
-        """Check user's usage for today.
-
-        Returns:
-            Tuple of (daily_limit, used_today, remaining_today, resets_at)
-        """
-        daily_limit = 1000000  # effectively unlimited for self-hosted
-
-        used_today = await self.insights_repo.get_usage_count_today(user_id)
-        remaining = max(0, daily_limit - used_today)
-
-        # Calculate reset time (midnight UTC)
-        now = datetime.now(UTC)
-        tomorrow = now.replace(hour=0, minute=0, second=0, microsecond=0)
-        if tomorrow <= now:
-            from datetime import timedelta
-
-            tomorrow += timedelta(days=1)
-
-        return daily_limit, used_today, remaining, tomorrow
-
-    async def can_generate(self, user_id: UUID) -> bool:
-        """Check if user can generate more insights today."""
-        _, _, remaining, _ = await self.check_usage(user_id)
-        return remaining > 0
 
     # =========================================================================
     # Validation
@@ -218,9 +187,6 @@ class InsightsService:
             # Mark as completed
             await self.insights_repo.update_insight_status(insight.id, "completed")
 
-            # Increment usage
-            await self.insights_repo.increment_usage(user_id)
-
             # Refresh and return
             return await self.insights_repo.get_insight_by_id(insight.id, user_id)
 
@@ -241,7 +207,7 @@ class InsightsService:
         """Generate insight (non-streaming).
 
         This method:
-        1. Validates consent and usage
+        1. Validates consent
         2. Fetches messages (single fetch, no double-fetch)
         3. Calls LLM for completion
         4. Stores and returns the result
@@ -250,11 +216,6 @@ class InsightsService:
         has_consent, _, _, _ = await self.check_consent(user_id)
         if not has_consent:
             raise ConsentRequiredError("User consent required for insights")
-
-        # Check usage limits
-        if not await self.can_generate(user_id):
-            _, _, _, reset_at = await self.check_usage(user_id)
-            raise InsightRateLimitError("Daily insight limit exceeded", reset_at=reset_at)
 
         max_msgs = self.max_messages
 
@@ -303,7 +264,7 @@ class InsightsService:
         """Generate insight from specific message IDs (non-streaming).
 
         This method:
-        1. Validates consent and usage
+        1. Validates consent
         2. Fetches messages by IDs
         3. Extracts chat_ids and date range from fetched messages
         4. Calls LLM for completion
@@ -313,11 +274,6 @@ class InsightsService:
         has_consent, _, _, _ = await self.check_consent(user_id)
         if not has_consent:
             raise ConsentRequiredError("User consent required for insights")
-
-        # Check usage limits
-        if not await self.can_generate(user_id):
-            _, _, _, reset_at = await self.check_usage(user_id)
-            raise InsightRateLimitError("Daily insight limit exceeded", reset_at=reset_at)
 
         # Fetch messages by IDs
         messages = await self.message_repo.get_messages_by_ids(

@@ -70,6 +70,10 @@ class Settings(BaseSettings):
     debug: bool = Field(default=False, description="Enable debug mode")
 
     # Feature Toggles (for self-hosted deployments)
+    llm_enabled: bool = Field(
+        default=False,
+        description="Enable LLM-powered AI insights (requires LLM provider configuration)",
+    )
     api_version: str = Field(default="1.0.0", description="API version")
 
     # CORS Configuration

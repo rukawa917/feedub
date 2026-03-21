@@ -12,14 +12,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.core.retry import db_retry
 from src.models.insight import Insight
 from src.models.user import User
-from src.models.user_insights_usage import UserInsightsUsage
 
 
 class InsightsRepository:
     """Repository for insights-related database operations.
 
-    Handles all database interactions for Insight and UserInsightsUsage
-    models following Repository pattern.
+    Handles all database interactions for Insight model
+    following Repository pattern.
     """
 
     def __init__(self, session: AsyncSession):
@@ -63,81 +62,6 @@ class InsightsRepository:
         if user:
             user.llm_consent_given = value
             await self.session.commit()
-
-    # =========================================================================
-    # Usage Operations
-    # =========================================================================
-
-    @db_retry
-    async def get_usage_today(self, user_id: UUID) -> UserInsightsUsage | None:
-        """Get today's usage record for user.
-
-        Args:
-            user_id: UUID of the user.
-
-        Returns:
-            UserInsightsUsage for today's date if found, None otherwise.
-        """
-        today = datetime.now(UTC).date()
-        stmt = (
-            select(UserInsightsUsage)
-            .where(UserInsightsUsage.user_id == user_id)
-            .where(UserInsightsUsage.date == today)
-        )
-        result = await self.session.execute(stmt)
-        return result.scalar_one_or_none()
-
-    @db_retry
-    async def increment_usage(self, user_id: UUID) -> UserInsightsUsage:
-        """Increment user's usage count for today with row-level locking.
-
-        Uses SELECT FOR UPDATE to prevent race conditions where concurrent
-        requests could both pass usage checks and increment beyond daily limit.
-
-        Creates a new usage record if one doesn't exist for today.
-
-        Args:
-            user_id: UUID of the user.
-
-        Returns:
-            Updated or created UserInsightsUsage instance.
-        """
-        today = datetime.now(UTC).date()
-
-        # SELECT FOR UPDATE to lock row during read-modify-write transaction
-        stmt = (
-            select(UserInsightsUsage)
-            .where(UserInsightsUsage.user_id == user_id)
-            .where(UserInsightsUsage.date == today)
-            .with_for_update()
-        )
-        result = await self.session.execute(stmt)
-        usage = result.scalar_one_or_none()
-
-        if usage:
-            usage.request_count += 1
-        else:
-            usage = UserInsightsUsage(
-                user_id=user_id,
-                request_count=1,
-            )
-            self.session.add(usage)
-
-        await self.session.commit()
-        return usage
-
-    @db_retry
-    async def get_usage_count_today(self, user_id: UUID) -> int:
-        """Get user's usage count for today.
-
-        Args:
-            user_id: UUID of the user.
-
-        Returns:
-            Number of insights generated today (0 if no usage record).
-        """
-        usage = await self.get_usage_today(user_id)
-        return usage.request_count if usage else 0
 
     # =========================================================================
     # Insight Operations

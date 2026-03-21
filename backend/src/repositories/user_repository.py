@@ -207,7 +207,6 @@ class UserRepository:
         - channel_selections
         - channel_favorites
         - llm_consents
-        - insights_usages
         - insights
 
         Args:
@@ -237,7 +236,6 @@ class UserRepository:
         - All channel_selections
         - All channel_favorites
         - All llm_consents
-        - All insights_usages
         - All insights
 
         Keeps:
@@ -256,8 +254,6 @@ class UserRepository:
         from src.models.message_fetch import MessageFetch
         from src.models.user_channel_favorite import UserChannelFavorite
         from src.models.user_channel_selection import UserChannelSelection
-        from src.models.user_insights_usage import UserInsightsUsage
-
         total_deleted = 0
 
         # Delete messages
@@ -277,11 +273,6 @@ class UserRepository:
 
         # Delete channel favorites
         stmt = delete(UserChannelFavorite).where(UserChannelFavorite.user_id == user_id)
-        result = await self.session.execute(stmt)
-        total_deleted += result.rowcount or 0
-
-        # Delete insights usages
-        stmt = delete(UserInsightsUsage).where(UserInsightsUsage.user_id == user_id)
         result = await self.session.execute(stmt)
         total_deleted += result.rowcount or 0
 

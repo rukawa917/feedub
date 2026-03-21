@@ -188,58 +188,6 @@ class TestRevokeConsentEndpoint:
 
 
 # =============================================================================
-# Usage Endpoint Tests
-# =============================================================================
-
-
-class TestUsageEndpoint:
-    """Contract tests for GET /insights/usage."""
-
-    def test_usage_requires_authentication(self):
-        """Test that endpoint requires authentication."""
-        from src.main import app
-
-        client = TestClient(app)
-        response = client.get("/insights/usage")
-
-        assert response.status_code == 403
-
-    def test_usage_returns_200(self, authenticated_client, mock_insights_service):
-        """Test that GET /insights/usage returns 200."""
-        mock_insights_service.check_usage.return_value = (
-            5,  # daily_limit
-            2,  # used_today
-            3,  # remaining
-            datetime.now(UTC),  # resets_at
-        )
-        response = authenticated_client.get("/insights/usage")
-
-        assert response.status_code == 200
-
-    def test_usage_response_structure(self, authenticated_client, mock_insights_service):
-        """Test response has required fields."""
-        mock_insights_service.check_usage.return_value = (5, 2, 3, datetime.now(UTC))
-        response = authenticated_client.get("/insights/usage")
-        data = response.json()
-
-        assert "daily_limit" in data
-        assert "used_today" in data
-        assert "remaining_today" in data
-        assert "resets_at" in data
-
-    def test_usage_field_types(self, authenticated_client, mock_insights_service):
-        """Test response field types are correct."""
-        mock_insights_service.check_usage.return_value = (5, 2, 3, datetime.now(UTC))
-        response = authenticated_client.get("/insights/usage")
-        data = response.json()
-
-        assert isinstance(data["daily_limit"], int)
-        assert isinstance(data["used_today"], int)
-        assert isinstance(data["remaining_today"], int)
-        assert isinstance(data["resets_at"], str)
-
-
-# =============================================================================
 # Validation Endpoint Tests
 # =============================================================================
 

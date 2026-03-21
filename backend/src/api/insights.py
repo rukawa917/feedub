@@ -21,7 +21,6 @@ from src.core.dependencies import get_current_user
 from src.core.exceptions import (
     ConsentRequiredError,
     InsightGenerationError,
-    InsightRateLimitError,
     MessageLimitExceededError,
 )
 from src.models.user import User
@@ -37,7 +36,6 @@ from src.schemas.insights import (
     InsightListResponse,
     InsightSummary,
     RevokeConsentResponse,
-    UsageResponse,
     ValidateInsightRequest,
     ValidateInsightResponse,
 )
@@ -185,46 +183,6 @@ async def revoke_consent(
     return RevokeConsentResponse(
         success=True,
         revoked_at=revoked_at,
-    )
-
-
-# =============================================================================
-# Usage Endpoints
-# =============================================================================
-
-
-@router.get(
-    "/usage",
-    response_model=UsageResponse,
-    status_code=status.HTTP_200_OK,
-    summary="Check usage limits",
-    description="Get user's daily insight generation usage and limits",
-)
-async def get_usage(
-    current_user: User = Depends(get_current_user),  # noqa: B008
-    service: InsightsService = Depends(get_insights_service),  # noqa: B008
-) -> UsageResponse:
-    """Check daily usage limits.
-
-    Returns the user's daily limit, how many they've used today,
-    remaining allowance, and when the limit resets (midnight UTC).
-
-    Args:
-        current_user: Authenticated user from token.
-        service: InsightsService instance.
-
-    Returns:
-        UsageResponse with usage details.
-    """
-    logger.info(f"[INSIGHTS] GET /insights/usage - user_id={current_user.id}")
-
-    daily_limit, used_today, remaining, resets_at = await service.check_usage(current_user.id)
-
-    return UsageResponse(
-        daily_limit=daily_limit,
-        used_today=used_today,
-        remaining_today=remaining,
-        resets_at=resets_at,
     )
 
 
@@ -421,22 +379,6 @@ def _streaming_insight_response(
                 )
                 return
 
-            # Check rate limit
-            if not await service.can_generate(user_id):
-                daily_limit, used_today, _, reset_at = await service.check_usage(user_id)
-                yield _format_sse_event(
-                    {
-                        "type": "error",
-                        "error": "rate_limit_exceeded",
-                        "detail": "Daily insight limit exceeded",
-                        "reset_at": reset_at.isoformat() if reset_at else None,
-                        "daily_limit": daily_limit,
-                        "used_today": used_today,
-                        "upgrade_required": None,
-                    }
-                )
-                return
-
             yield _format_sse_event({"type": "status", "status": "generating"})
 
             try:
@@ -468,16 +410,6 @@ def _streaming_insight_response(
                         "error": "consent_required",
                         "detail": str(e),
                         "requires_reconsent": e.requires_reconsent,
-                    }
-                )
-            except InsightRateLimitError as e:
-                yield _format_sse_event(
-                    {
-                        "type": "error",
-                        "error": "rate_limit_exceeded",
-                        "detail": str(e),
-                        "reset_at": e.reset_at.isoformat() if e.reset_at else None,
-                        "upgrade_required": None,
                     }
                 )
             except MessageLimitExceededError as e:

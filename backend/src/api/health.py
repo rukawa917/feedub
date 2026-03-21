@@ -80,6 +80,7 @@ class LivenessResponse(BaseModel):
     status: str
     version: str
     timestamp: datetime
+    llm_enabled: bool
 
 
 @router.get("/health/live", response_model=LivenessResponse)
@@ -89,6 +90,7 @@ async def liveness_check() -> LivenessResponse:
         status="ok",
         version=settings.api_version,
         timestamp=datetime.now(UTC),
+        llm_enabled=settings.llm_enabled,
     )
 
 

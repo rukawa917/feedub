@@ -25,7 +25,6 @@ from src.core.exceptions import (
     AuthenticationError,
     ConsentRequiredError,
     InsightGenerationError,
-    InsightRateLimitError,
     MessageLimitExceededError,
     RateLimitError,
     SessionExpiredError,
@@ -250,21 +249,6 @@ async def consent_required_error_handler(
             "error": "consent_required",
             "detail": str(exc),
             "requires_reconsent": exc.requires_reconsent,
-        },
-    )
-
-
-@app.exception_handler(InsightRateLimitError)
-async def insight_rate_limit_error_handler(
-    request: Request, exc: InsightRateLimitError
-) -> JSONResponse:
-    """Handle insight rate limit errors with 429 response."""
-    return JSONResponse(
-        status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-        content={
-            "error": "insight_rate_limit_exceeded",
-            "detail": str(exc),
-            "reset_at": exc.reset_at.isoformat() if exc.reset_at else None,
         },
     )
 

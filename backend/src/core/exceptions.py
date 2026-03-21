@@ -103,25 +103,6 @@ class ConsentRequiredError(FeedubBaseException):
         self.requires_reconsent = requires_reconsent
 
 
-class InsightRateLimitError(FeedubBaseException):
-    """Raised when user exceeds daily insight generation limit."""
-
-    def __init__(
-        self,
-        message: str = "Daily insight limit exceeded",
-        reset_at: "datetime | None" = None,
-    ) -> None:
-        """
-        Initialize insight rate limit error with 429 status.
-
-        Args:
-            message: Error message.
-            reset_at: UTC datetime when the limit resets (midnight UTC).
-        """
-        super().__init__(message, status_code=429)
-        self.reset_at = reset_at
-
-
 class MessageLimitExceededError(FeedubBaseException):
     """Raised when insight request exceeds maximum message count."""
 

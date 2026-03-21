@@ -335,7 +335,7 @@ async def delete_account(
        - channel_selections
        - channel_favorites
        - llm_consents
-       - insights_usages
+
        - insights
        - insights
 

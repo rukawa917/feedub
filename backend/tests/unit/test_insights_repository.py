@@ -1,7 +1,7 @@
 """
 Unit tests for InsightsRepository.
 
-Tests all database operations for insights, consent, and usage tracking
+Tests all database operations for insights and consent
 with mocked AsyncSession.
 """
 
@@ -13,7 +13,6 @@ import pytest
 
 from src.models.insight import Insight
 from src.models.user import User
-from src.models.user_insights_usage import UserInsightsUsage
 from src.repositories.insights_repository import InsightsRepository
 
 pytestmark = pytest.mark.asyncio
@@ -117,129 +116,6 @@ class TestConsentOperations:
         await repository.set_consent(user_id, True)
 
         mock_session.commit.assert_not_called()
-
-
-class TestUsageOperations:
-    """Test suite for usage tracking operations."""
-
-    @pytest.fixture
-    def mock_session(self):
-        """Create a mock async database session."""
-        session = AsyncMock()
-        session.execute = AsyncMock()
-        session.add = MagicMock()
-        session.commit = AsyncMock()
-        return session
-
-    @pytest.fixture
-    def repository(self, mock_session):
-        """Create InsightsRepository with mocked session."""
-        return InsightsRepository(mock_session)
-
-    async def test_get_usage_today_returns_todays_record(self, repository, mock_session):
-        """Test that get_usage_today returns today's usage record."""
-        user_id = uuid4()
-        today = datetime.now(UTC).date()
-        usage = UserInsightsUsage(
-            user_id=user_id,
-            date=today,
-            request_count=3,
-        )
-
-        mock_result = MagicMock()
-        mock_result.scalar_one_or_none.return_value = usage
-        mock_session.execute.return_value = mock_result
-
-        result = await repository.get_usage_today(user_id)
-
-        assert result == usage
-        assert result.date == today
-        assert result.request_count == 3
-        mock_session.execute.assert_called_once()
-
-    async def test_get_usage_today_returns_none_when_no_record(self, repository, mock_session):
-        """Test that get_usage_today returns None when no record exists for today."""
-        user_id = uuid4()
-
-        mock_result = MagicMock()
-        mock_result.scalar_one_or_none.return_value = None
-        mock_session.execute.return_value = mock_result
-
-        result = await repository.get_usage_today(user_id)
-
-        assert result is None
-        mock_session.execute.assert_called_once()
-
-    async def test_increment_usage_increments_existing_record(self, repository, mock_session):
-        """Test that increment_usage increments request count for existing record."""
-        user_id = uuid4()
-        today = datetime.now(UTC).date()
-        usage = UserInsightsUsage(
-            user_id=user_id,
-            date=today,
-            request_count=3,
-        )
-
-        mock_result = MagicMock()
-        mock_result.scalar_one_or_none.return_value = usage
-        mock_session.execute.return_value = mock_result
-
-        result = await repository.increment_usage(user_id)
-
-        assert result == usage
-        assert result.request_count == 4  # Incremented from 3 to 4
-        mock_session.add.assert_not_called()  # Existing record, not added
-        mock_session.commit.assert_called_once()
-
-    async def test_increment_usage_creates_new_record_if_none_exists(
-        self, repository, mock_session
-    ):
-        """Test that increment_usage creates new record if none exists for today."""
-        user_id = uuid4()
-
-        mock_result = MagicMock()
-        mock_result.scalar_one_or_none.return_value = None
-        mock_session.execute.return_value = mock_result
-
-        result = await repository.increment_usage(user_id)
-
-        assert isinstance(result, UserInsightsUsage)
-        assert result.user_id == user_id
-        assert result.request_count == 1  # New record starts at 1
-        mock_session.add.assert_called_once()
-        mock_session.commit.assert_called_once()
-
-    async def test_get_usage_count_today_returns_count(self, repository, mock_session):
-        """Test that get_usage_count_today returns the count from usage record."""
-        user_id = uuid4()
-        today = datetime.now(UTC).date()
-        usage = UserInsightsUsage(
-            user_id=user_id,
-            date=today,
-            request_count=5,
-        )
-
-        mock_result = MagicMock()
-        mock_result.scalar_one_or_none.return_value = usage
-        mock_session.execute.return_value = mock_result
-
-        result = await repository.get_usage_count_today(user_id)
-
-        assert result == 5
-
-    async def test_get_usage_count_today_returns_zero_when_no_record(
-        self, repository, mock_session
-    ):
-        """Test that get_usage_count_today returns 0 when no record exists."""
-        user_id = uuid4()
-
-        mock_result = MagicMock()
-        mock_result.scalar_one_or_none.return_value = None
-        mock_session.execute.return_value = mock_result
-
-        result = await repository.get_usage_count_today(user_id)
-
-        assert result == 0
 
 
 class TestInsightOperations:

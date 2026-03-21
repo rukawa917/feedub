@@ -11,7 +11,6 @@ from src.models.message_fetch import MessageFetch
 from src.models.user import User
 from src.models.user_channel_favorite import UserChannelFavorite
 from src.models.user_channel_selection import UserChannelSelection
-from src.models.user_insights_usage import UserInsightsUsage
 
 __all__ = [
     "User",
@@ -20,5 +19,4 @@ __all__ = [
     "UserChannelFavorite",
     "UserChannelSelection",
     "Insight",
-    "UserInsightsUsage",
 ]

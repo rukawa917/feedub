@@ -9,7 +9,6 @@ import pytest
 from src.core.exceptions import (
     ConsentRequiredError,
     InsightGenerationError,
-    InsightRateLimitError,
     MessageLimitExceededError,
 )
 from src.llm.provider import LLMResponse
@@ -25,8 +24,6 @@ pytestmark = pytest.mark.asyncio
 MOCK_LLM_MAX_INPUT_TOKENS = 60_000
 MOCK_MAX_MESSAGES = MOCK_LLM_MAX_INPUT_TOKENS // TOKENS_PER_MESSAGE_ESTIMATE
 
-# Effectively unlimited daily limit for self-hosted use
-UNLIMITED_DAILY_LIMIT = 1000000
 
 # =============================================================================
 # Fixtures
@@ -90,11 +87,6 @@ class TestCustomExceptions:
             assert str(e) == "Wrapper error"
             assert e.__cause__ == cause
 
-    def test_rate_limit_exceeded_error(self):
-        error = InsightRateLimitError("Rate limit exceeded")
-        assert str(error) == "Rate limit exceeded"
-        assert isinstance(error, Exception)
-
     def test_consent_required_error(self):
         error = ConsentRequiredError("Consent required")
         assert str(error) == "Consent required"
@@ -142,66 +134,6 @@ class TestRevokeConsent:
     async def test_returns_none(self, insights_service, mock_insights_repo, user_id):
         result = await insights_service.revoke_consent(user_id)
         assert result is None
-
-
-# =============================================================================
-# Test Usage Management
-# =============================================================================
-
-
-class TestCheckUsage:
-    async def test_returns_current_usage_count_and_remaining(
-        self, insights_service, mock_insights_repo, user_id
-    ):
-        mock_insights_repo.get_usage_count_today.return_value = 3
-        daily_limit, used_today, remaining, resets_at = await insights_service.check_usage(user_id)
-        assert daily_limit == UNLIMITED_DAILY_LIMIT
-        assert used_today == 3
-        assert remaining == UNLIMITED_DAILY_LIMIT - 3
-        assert isinstance(resets_at, datetime)
-        assert resets_at > datetime.now(UTC)
-
-    async def test_remaining_decreases_with_usage(
-        self, insights_service, mock_insights_repo, user_id
-    ):
-        mock_insights_repo.get_usage_count_today.return_value = 500
-        _, _, remaining, _ = await insights_service.check_usage(user_id)
-        assert remaining == UNLIMITED_DAILY_LIMIT - 500
-
-    async def test_remaining_never_goes_below_zero(
-        self, insights_service, mock_insights_repo, user_id
-    ):
-        # Even if usage somehow exceeds limit, remaining is clamped to 0
-        mock_insights_repo.get_usage_count_today.return_value = UNLIMITED_DAILY_LIMIT + 5
-        _, _, remaining, _ = await insights_service.check_usage(user_id)
-        assert remaining == 0
-
-    async def test_reset_time_is_next_midnight_utc(
-        self, insights_service, mock_insights_repo, user_id
-    ):
-        mock_insights_repo.get_usage_count_today.return_value = 2
-        _, _, _, resets_at = await insights_service.check_usage(user_id)
-        assert resets_at.hour == 0
-        assert resets_at.minute == 0
-        assert resets_at.second == 0
-        assert resets_at.microsecond == 0
-        assert resets_at > datetime.now(UTC)
-
-
-class TestCanGenerate:
-    async def test_returns_true_when_under_limit(
-        self, insights_service, mock_insights_repo, user_id
-    ):
-        mock_insights_repo.get_usage_count_today.return_value = 2
-        result = await insights_service.can_generate(user_id)
-        assert result is True
-
-    async def test_returns_true_for_high_usage_within_unlimited_limit(
-        self, insights_service, mock_insights_repo, user_id
-    ):
-        mock_insights_repo.get_usage_count_today.return_value = 999999
-        result = await insights_service.can_generate(user_id)
-        assert result is True
 
 
 # =============================================================================
@@ -293,9 +225,8 @@ class TestValidateRequest:
 # =============================================================================
 
 
-def _setup_consent_and_usage(mock_insights_repo, usage_count=2):
+def _setup_consent(mock_insights_repo):
     mock_insights_repo.get_consent.return_value = True
-    mock_insights_repo.get_usage_count_today.return_value = usage_count
 
 
 def _make_messages(count=100):
@@ -336,7 +267,7 @@ class TestGenerateInsight:
     async def test_raises_message_limit_when_too_many_messages(
         self, insights_service, mock_insights_repo, mock_message_repo, user_id
     ):
-        _setup_consent_and_usage(mock_insights_repo)
+        _setup_consent(mock_insights_repo)
         messages = [MagicMock(id=uuid4()) for _ in range(MOCK_MAX_MESSAGES + 1)]
         mock_message_repo.get_messages_for_insights.return_value = messages
 
@@ -352,7 +283,7 @@ class TestGenerateInsight:
     async def test_raises_error_when_no_messages_found(
         self, insights_service, mock_insights_repo, mock_message_repo, user_id
     ):
-        _setup_consent_and_usage(mock_insights_repo)
+        _setup_consent(mock_insights_repo)
         mock_message_repo.get_messages_for_insights.return_value = []
         with pytest.raises(InsightGenerationError, match="No messages found"):
             await insights_service.generate_insight(
@@ -366,7 +297,7 @@ class TestGenerateInsight:
     async def test_creates_insight_and_calls_llm(
         self, insights_service, mock_insights_repo, mock_message_repo, user_id
     ):
-        _setup_consent_and_usage(mock_insights_repo)
+        _setup_consent(mock_insights_repo)
         messages = _make_messages(100)
         mock_message_repo.get_messages_for_insights.return_value = messages
 
@@ -407,13 +338,12 @@ class TestGenerateInsight:
         mock_insights_repo.update_insight_status.assert_any_call(insight_id, "generating")
         mock_insights_repo.update_insight_content.assert_called_once()
         mock_insights_repo.update_insight_status.assert_any_call(insight_id, "completed")
-        mock_insights_repo.increment_usage.assert_called_once_with(user_id)
         assert result.status == "completed"
 
     async def test_marks_insight_failed_on_error(
         self, insights_service, mock_insights_repo, mock_message_repo, user_id
     ):
-        _setup_consent_and_usage(mock_insights_repo)
+        _setup_consent(mock_insights_repo)
         messages = _make_messages(100)
         mock_message_repo.get_messages_for_insights.return_value = messages
 

@@ -20,7 +20,6 @@ if TYPE_CHECKING:
     from src.models.message_fetch import MessageFetch
     from src.models.user_channel_favorite import UserChannelFavorite
     from src.models.user_channel_selection import UserChannelSelection
-    from src.models.user_insights_usage import UserInsightsUsage
 
 
 class User(Base):
@@ -67,9 +66,6 @@ class User(Base):
     )
     channel_favorites: Mapped[list["UserChannelFavorite"]] = relationship(  # noqa: F821
         "UserChannelFavorite", back_populates="user", cascade="all, delete-orphan"
-    )
-    insights_usages: Mapped[list["UserInsightsUsage"]] = relationship(  # noqa: F821
-        "UserInsightsUsage", back_populates="user", cascade="all, delete-orphan"
     )
     insights: Mapped[list["Insight"]] = relationship(  # noqa: F821
         "Insight", back_populates="user", cascade="all, delete-orphan"

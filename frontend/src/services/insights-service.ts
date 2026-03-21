@@ -1,6 +1,6 @@
 /**
  * Insights Service
- * API calls for LLM insights including consent, usage, validation, and generation
+ * API calls for LLM insights including consent, validation, and generation
  */
 
 import { API_ENDPOINTS } from './api/config'
@@ -9,7 +9,6 @@ import type {
   ConsentStatus,
   ConsentResponse,
   RevokeConsentResponse,
-  UsageStatus,
   ValidationRequest,
   ValidationResponse,
   SSEEvent,
@@ -68,13 +67,6 @@ export async function giveConsent(version: string): Promise<ConsentResponse> {
  */
 export async function revokeConsent(): Promise<RevokeConsentResponse> {
   return apiClient.post<RevokeConsentResponse>(API_ENDPOINTS.insights.revokeConsent)
-}
-
-/**
- * Get usage status (daily limit, remaining, reset time)
- */
-export async function getUsage(): Promise<UsageStatus> {
-  return apiClient.get<UsageStatus>(API_ENDPOINTS.insights.usage)
 }
 
 /**

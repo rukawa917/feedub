@@ -21,14 +21,6 @@ export interface RevokeConsentResponse {
   revoked_at: string
 }
 
-// Usage types
-export interface UsageStatus {
-  daily_limit: number
-  used_today: number
-  remaining_today: number
-  resets_at: string // ISO timestamp
-}
-
 // Validation types
 // NOTE: chat_ids are strings (matching backend schema), dates are REQUIRED
 export interface ValidationRequest {

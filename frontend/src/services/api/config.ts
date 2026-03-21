@@ -62,7 +62,6 @@ export const API_ENDPOINTS = {
     consentStatus: '/insights/consent/status',
     giveConsent: '/insights/consent/give',
     revokeConsent: '/insights/consent/revoke',
-    usage: '/insights/usage',
     validate: '/insights/validate',
     generate: '/insights/generate',
     generateFromIds: '/insights/generate-from-ids',
@@ -72,4 +71,5 @@ export const API_ENDPOINTS = {
 
   // Health
   health: '/health',
+  healthLive: '/health/live',
 }

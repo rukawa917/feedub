@@ -26,6 +26,7 @@ import { useAuthStore } from '../../stores/auth'
 import type { FilterState, InsightsLocationState } from '../../types/filters'
 import type { Message } from '../../types/message'
 import type { AvailableChannel } from '../../services/api/channels'
+import { useLlmEnabled } from '../../hooks/useLlmEnabled'
 
 /** Extract date range from messages for display */
 function getMessageDateRange(messages: Message[]) {
@@ -86,6 +87,7 @@ export function MessagePane({
   availableChannels,
 }: MessagePaneProps) {
   const navigate = useNavigate()
+  const llmEnabled = useLlmEnabled()
   const [isFetchingAllIds, setIsFetchingAllIds] = useState(false)
 
   const {
@@ -169,26 +171,28 @@ export function MessagePane({
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            {/* Insights button */}
-            <button
-              onClick={handleInsightsClick}
-              disabled={messages.length === 0 || isFetchingAllIds}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/10 border border-primary/20 hover:bg-primary/20 hover:border-primary/30 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-              aria-label="AI Insights"
-            >
-              {isFetchingAllIds ? (
-                <div className="h-4 w-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-              ) : (
-                <Sparkles className="h-4 w-4 text-primary" />
-              )}
-              <span className="hidden sm:inline text-sm font-medium text-primary">
-                {isFetchingAllIds
-                  ? 'Loading...'
-                  : totalFiltered > 0
-                    ? `Analyze ${totalFiltered.toLocaleString()}`
-                    : 'Insights'}
-              </span>
-            </button>
+            {/* Insights button (hidden when LLM is disabled) */}
+            {llmEnabled && (
+              <button
+                onClick={handleInsightsClick}
+                disabled={messages.length === 0 || isFetchingAllIds}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/10 border border-primary/20 hover:bg-primary/20 hover:border-primary/30 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-label="AI Insights"
+              >
+                {isFetchingAllIds ? (
+                  <div className="h-4 w-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                ) : (
+                  <Sparkles className="h-4 w-4 text-primary" />
+                )}
+                <span className="hidden sm:inline text-sm font-medium text-primary">
+                  {isFetchingAllIds
+                    ? 'Loading...'
+                    : totalFiltered > 0
+                      ? `Analyze ${totalFiltered.toLocaleString()}`
+                      : 'Insights'}
+                </span>
+              </button>
+            )}
 
             <SyncButton
               onRefreshMessages={handleRefreshMessages}

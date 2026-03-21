@@ -5,7 +5,6 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useInsightsConsent } from '../../hooks/useInsightsConsent'
-import { useInsightsUsage } from '../../hooks/useInsightsUsage'
 import { useInsightGeneration } from '../../hooks/useInsightGeneration'
 import { InsightStream } from './InsightStream'
 import { ConsentDialog } from './ConsentDialog'
@@ -31,7 +30,6 @@ export function InsightGenerator({
   onGenerationComplete,
 }: InsightGeneratorProps) {
   const { needsConsent, consentStatus, giveConsent } = useInsightsConsent()
-  const { usage, canGenerate, refetch: refetchUsage } = useInsightsUsage()
   const generation = useInsightGeneration()
 
   // Local state
@@ -50,7 +48,7 @@ export function InsightGenerator({
     return 'en'
   })
 
-  const canSubmit = messageIds.length > 0 && canGenerate && generation.status === 'idle'
+  const canSubmit = messageIds.length > 0 && generation.status === 'idle'
 
   // Handle re-consent requirement from SSE errors
   useEffect(() => {
@@ -83,9 +81,8 @@ export function InsightGenerator({
     }
 
     await generation.generate(request)
-    refetchUsage()
     onGenerationComplete?.()
-  }, [needsConsent, messageIds, language, generation, refetchUsage, onGenerationComplete])
+  }, [needsConsent, messageIds, language, generation, onGenerationComplete])
 
   // Handle consent given
   const handleConsent = useCallback(async () => {
@@ -101,18 +98,16 @@ export function InsightGenerator({
       }
       generation.reset() // Clear error state before retrying
       await generation.generate(request)
-      refetchUsage()
       onGenerationComplete?.()
     } finally {
       setConsentLoading(false)
     }
-  }, [giveConsent, messageIds, language, generation, refetchUsage, onGenerationComplete])
+  }, [giveConsent, messageIds, language, generation, onGenerationComplete])
 
   // Handle "Generate Another" after completion
   const handleGenerateAnother = useCallback(() => {
     generation.reset()
-    refetchUsage()
-  }, [generation, refetchUsage])
+  }, [generation])
 
   // Show stream view when generating or completed
   const showStreamView =
@@ -191,24 +186,12 @@ export function InsightGenerator({
           </Button>
 
           {/* Helper text */}
-          {!canGenerate && usage && (
-            <p className="text-xs text-foreground-muted text-center">
-              Daily limit reached ({usage.used_today}/{usage.daily_limit})
-              {usage.resets_at && (
-                <span className="ml-1">
-                  - Resets in{' '}
-                  {Math.ceil((new Date(usage.resets_at).getTime() - Date.now()) / (1000 * 60 * 60))}
-                  h
-                </span>
-              )}
-            </p>
-          )}
           {messageIds.length === 0 && (
             <p className="text-xs text-foreground-muted text-center">
               No messages selected. Go back to Dashboard and adjust your filters.
             </p>
           )}
-          {messageIds.length > 0 && canGenerate && (
+          {messageIds.length > 0 && (
             <p className="text-xs text-foreground-muted text-center">
               💡 Want to change the selection? Go back to Dashboard and adjust your filters.
             </p>

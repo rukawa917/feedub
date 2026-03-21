@@ -42,20 +42,6 @@ class RevokeConsentResponse(BaseModel):
 
 
 # ============================================================================
-# Usage Schemas
-# ============================================================================
-
-
-class UsageResponse(BaseModel):
-    """Response for usage limits."""
-
-    daily_limit: int = Field(default=5)
-    used_today: int
-    remaining_today: int
-    resets_at: datetime
-
-
-# ============================================================================
 # Validation Schemas
 # ============================================================================
 

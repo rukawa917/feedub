@@ -18,12 +18,11 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
-import { ArrowLeft, Sparkles, Clock, History as HistoryIcon, Settings } from 'lucide-react'
+import { ArrowLeft, Sparkles, History as HistoryIcon, Settings } from 'lucide-react'
 import { FeedubIcon } from '../components/common/FeedubIcon'
 import { ThemeToggle } from '../components/common/ThemeToggle'
 import { LogoutButton } from '../components/auth/LogoutButton'
 import { ConsentDialog } from '../components/insights/ConsentDialog'
-import { UsageIndicator } from '../components/insights/UsageIndicator'
 import { InsightOnboarding } from '../components/insights/InsightOnboarding'
 import { InsightGenerator } from '../components/insights/InsightGenerator'
 import { InsightCard, InsightHistoryEmpty } from '../components/insights/InsightCard'
@@ -46,7 +45,6 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { useInsightsConsent } from '../hooks/useInsightsConsent'
-import { useInsightsUsage } from '../hooks/useInsightsUsage'
 import { useInsightHistory } from '../hooks/useInsightHistory'
 import { useAuthStore } from '../stores/auth'
 import { useToast } from '../contexts/ToastContext'
@@ -75,14 +73,6 @@ export function Insights() {
     giveConsent,
     revokeConsent,
   } = useInsightsConsent()
-
-  const {
-    usage,
-    isLoading: isLoadingUsage,
-    canGenerate,
-    resetTimeFormatted,
-    refetch: refetchUsage,
-  } = useInsightsUsage()
 
   const {
     insights,
@@ -169,13 +159,12 @@ export function Insights() {
     try {
       await giveConsent()
       setShowConsentDialog(false)
-      refetchUsage()
     } catch (err) {
       console.error('Failed to give consent:', err)
     } finally {
       setIsConsentLoading(false)
     }
-  }, [giveConsent, refetchUsage])
+  }, [giveConsent])
 
   // Handle consent declined
   const handleDeclineConsent = useCallback(() => {
@@ -188,7 +177,6 @@ export function Insights() {
     try {
       await revokeConsent()
       setShowRevokeDialog(false)
-      refetchUsage()
       refetchHistory()
       showToast('Consent revoked. All insights have been deleted.', { variant: 'success' })
     } catch (err) {
@@ -197,7 +185,7 @@ export function Insights() {
     } finally {
       setIsRevokeLoading(false)
     }
-  }, [revokeConsent, refetchUsage, refetchHistory, showToast])
+  }, [revokeConsent, refetchHistory, showToast])
 
   // Handle "Generate First Insight" from empty history
   const handleGenerateFirst = useCallback(() => {
@@ -207,16 +195,10 @@ export function Insights() {
   // After generation completes, refresh history and optionally switch tab
   const handleGenerationComplete = useCallback(() => {
     refetchHistory()
-    refetchUsage()
-    // Optionally switch to history tab to show new insight
-    // setActiveTab('history')
-  }, [refetchHistory, refetchUsage])
+  }, [refetchHistory])
 
   // Determine if onboarding should be shown
   const showOnboarding = needsConsent && activeTab === 'generate' && !isLoadingConsent
-
-  // Determine if rate limit banner should be shown
-  const showRateLimitBanner = !canGenerate && usage && !needsConsent && activeTab === 'generate'
 
   // If viewing a specific insight detail, render the detail view
   if (insightId) {
@@ -250,9 +232,6 @@ export function Insights() {
 
             {/* Actions */}
             <div className="flex items-center gap-2">
-              {/* Usage Indicator */}
-              <UsageIndicator usage={usage} isLoading={isLoadingUsage} className="hidden sm:flex" />
-
               {/* Settings dropdown - only show if user has consent */}
               {!needsConsent && (
                 <DropdownMenu>
@@ -280,10 +259,6 @@ export function Insights() {
             </div>
           </div>
 
-          {/* Mobile usage indicator */}
-          <div className="sm:hidden mt-3">
-            <UsageIndicator usage={usage} isLoading={isLoadingUsage} />
-          </div>
         </div>
       </header>
 
@@ -345,43 +320,6 @@ export function Insights() {
                 {/* Onboarding - First-time users */}
                 {showOnboarding ? (
                   <InsightOnboarding onGetStarted={handleGetStarted} />
-                ) : showRateLimitBanner ? (
-                  /* Rate limit banner - Quota exhausted */
-                  <div className="flex flex-col items-center justify-center p-8 sm:p-12 text-center animate-fade-in-up">
-                    {/* Clock icon */}
-                    <div className="mb-6 w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/30 flex items-center justify-center">
-                      <Clock className="h-8 w-8 text-amber-500 animate-pulse" />
-                    </div>
-
-                    {/* Title */}
-                    <h3 className="text-2xl font-bold text-foreground mb-3">Daily Limit Reached</h3>
-
-                    {/* Message */}
-                    <p className="text-foreground-muted mb-2 max-w-md leading-relaxed">
-                      You've used {usage.used_today}/{usage.daily_limit} insights today.
-                    </p>
-                    <p className="text-foreground-muted mb-8 max-w-md leading-relaxed">
-                      New insights available {resetTimeFormatted}.
-                    </p>
-
-                    {/* Tip */}
-                    <div className="rounded-lg bg-secondary/50 border border-border p-4 mb-6 max-w-md">
-                      <p className="text-sm text-foreground-muted">
-                        💡 Tip: View your previous insights in the History tab while you wait.
-                      </p>
-                    </div>
-
-                    {/* CTA Button */}
-                    <Button
-                      onClick={() => setActiveTab('history')}
-                      variant="outline"
-                      size="lg"
-                      className="gap-2"
-                    >
-                      View History
-                      <ArrowLeft className="h-4 w-4 rotate-180" />
-                    </Button>
-                  </div>
                 ) : hasMessageIds ? (
                   /* Generator form - Normal state */
                   <InsightGenerator
