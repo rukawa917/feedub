@@ -1,7 +1,7 @@
 """
 Unit tests for InsightsRepository.
 
-Tests all database operations for insights and consent
+Tests all database operations for insights
 with mocked AsyncSession.
 """
 
@@ -12,110 +12,9 @@ from uuid import uuid4
 import pytest
 
 from src.models.insight import Insight
-from src.models.user import User
 from src.repositories.insights_repository import InsightsRepository
 
 pytestmark = pytest.mark.asyncio
-
-
-class TestConsentOperations:
-    """Test suite for simplified boolean consent operations."""
-
-    @pytest.fixture
-    def mock_session(self):
-        """Create a mock async database session."""
-        session = AsyncMock()
-        session.execute = AsyncMock()
-        session.commit = AsyncMock()
-        return session
-
-    @pytest.fixture
-    def repository(self, mock_session):
-        """Create InsightsRepository with mocked session."""
-        return InsightsRepository(mock_session)
-
-    async def test_get_consent_returns_true_when_user_consented(self, repository, mock_session):
-        """Test that get_consent returns True when user has given consent."""
-        user_id = uuid4()
-
-        mock_result = MagicMock()
-        mock_result.scalar_one_or_none.return_value = True
-        mock_session.execute.return_value = mock_result
-
-        result = await repository.get_consent(user_id)
-
-        assert result is True
-        mock_session.execute.assert_called_once()
-
-    async def test_get_consent_returns_false_when_user_not_consented(
-        self, repository, mock_session
-    ):
-        """Test that get_consent returns False when user has not consented."""
-        user_id = uuid4()
-
-        mock_result = MagicMock()
-        mock_result.scalar_one_or_none.return_value = False
-        mock_session.execute.return_value = mock_result
-
-        result = await repository.get_consent(user_id)
-
-        assert result is False
-        mock_session.execute.assert_called_once()
-
-    async def test_get_consent_returns_false_when_user_not_found(self, repository, mock_session):
-        """Test that get_consent returns False when user does not exist."""
-        user_id = uuid4()
-
-        mock_result = MagicMock()
-        mock_result.scalar_one_or_none.return_value = None
-        mock_session.execute.return_value = mock_result
-
-        result = await repository.get_consent(user_id)
-
-        assert result is False
-        mock_session.execute.assert_called_once()
-
-    async def test_set_consent_sets_value_true(self, repository, mock_session):
-        """Test that set_consent sets llm_consent_given to True."""
-        user_id = uuid4()
-        user = MagicMock(spec=User)
-        user.llm_consent_given = False
-
-        mock_result = MagicMock()
-        mock_result.scalar_one_or_none.return_value = user
-        mock_session.execute.return_value = mock_result
-
-        await repository.set_consent(user_id, True)
-
-        assert user.llm_consent_given is True
-        mock_session.commit.assert_called_once()
-
-    async def test_set_consent_sets_value_false(self, repository, mock_session):
-        """Test that set_consent sets llm_consent_given to False."""
-        user_id = uuid4()
-        user = MagicMock(spec=User)
-        user.llm_consent_given = True
-
-        mock_result = MagicMock()
-        mock_result.scalar_one_or_none.return_value = user
-        mock_session.execute.return_value = mock_result
-
-        await repository.set_consent(user_id, False)
-
-        assert user.llm_consent_given is False
-        mock_session.commit.assert_called_once()
-
-    async def test_set_consent_does_nothing_when_user_not_found(self, repository, mock_session):
-        """Test that set_consent does nothing when user does not exist."""
-        user_id = uuid4()
-
-        mock_result = MagicMock()
-        mock_result.scalar_one_or_none.return_value = None
-        mock_session.execute.return_value = mock_result
-
-        await repository.set_consent(user_id, True)
-
-        mock_session.commit.assert_not_called()
 
 
 class TestInsightOperations:

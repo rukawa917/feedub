@@ -5,7 +5,6 @@ Tests that insights endpoints conform to API contract specifications.
 These tests use mocked authentication and database dependencies.
 """
 
-from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
@@ -46,145 +45,6 @@ def authenticated_client(mock_user, mock_insights_service):
     client = TestClient(app)
     yield client
     app.dependency_overrides.clear()
-
-
-# =============================================================================
-# Consent Endpoint Tests
-# =============================================================================
-
-
-class TestConsentStatusEndpoint:
-    """Contract tests for GET /insights/consent/status."""
-
-    def test_consent_status_requires_authentication(self):
-        """Test that endpoint requires authentication."""
-        from src.main import app
-
-        client = TestClient(app)
-        response = client.get("/insights/consent/status")
-
-        assert response.status_code == 403  # No auth header
-
-    def test_consent_status_returns_200(self, authenticated_client, mock_insights_service):
-        """Test that GET /insights/consent/status returns 200."""
-        mock_insights_service.check_consent.return_value = (
-            True,
-            "1.0",
-            "1.0",
-            False,
-        )
-        response = authenticated_client.get("/insights/consent/status")
-
-        assert response.status_code == 200
-
-    def test_consent_status_response_structure(self, authenticated_client, mock_insights_service):
-        """Test response has required fields."""
-        mock_insights_service.check_consent.return_value = (
-            True,
-            "1.0",
-            "1.0",
-            False,
-        )
-        response = authenticated_client.get("/insights/consent/status")
-        data = response.json()
-
-        assert "has_consent" in data
-        assert "consent_version" in data
-        assert "current_version" in data
-        assert "requires_re_consent" in data
-
-    def test_consent_status_field_types(self, authenticated_client, mock_insights_service):
-        """Test response field types are correct."""
-        mock_insights_service.check_consent.return_value = (
-            True,
-            "1.0",
-            "1.0",
-            False,
-        )
-        response = authenticated_client.get("/insights/consent/status")
-        data = response.json()
-
-        assert isinstance(data["has_consent"], bool)
-        assert isinstance(data["current_version"], str)
-        assert isinstance(data["requires_re_consent"], bool)
-
-
-class TestGiveConsentEndpoint:
-    """Contract tests for POST /insights/consent/give."""
-
-    def test_give_consent_requires_authentication(self):
-        """Test that endpoint requires authentication."""
-        from src.main import app
-
-        client = TestClient(app)
-        response = client.post(
-            "/insights/consent/give",
-            json={"version": "1.0"},
-        )
-
-        assert response.status_code == 403
-
-    def test_give_consent_requires_version(self, authenticated_client, mock_insights_service):
-        """Test that version field is required."""
-        response = authenticated_client.post(
-            "/insights/consent/give",
-            json={},  # Missing version
-        )
-
-        assert response.status_code == 422  # Validation error
-
-    def test_give_consent_returns_201(self, authenticated_client, mock_insights_service):
-        """Test that POST /insights/consent/give returns 201."""
-        mock_insights_service.give_consent.return_value = None
-        response = authenticated_client.post(
-            "/insights/consent/give",
-            json={"version": "1.0"},
-        )
-
-        assert response.status_code == 201
-
-    def test_give_consent_response_structure(self, authenticated_client, mock_insights_service):
-        """Test response has required fields."""
-        mock_insights_service.give_consent.return_value = None
-        response = authenticated_client.post(
-            "/insights/consent/give",
-            json={"version": "1.0"},
-        )
-        data = response.json()
-
-        assert "success" in data
-        assert "consent_version" in data
-        assert data["success"] is True
-        assert data["consent_version"] == "1.0"
-
-
-class TestRevokeConsentEndpoint:
-    """Contract tests for POST /insights/consent/revoke."""
-
-    def test_revoke_consent_requires_authentication(self):
-        """Test that endpoint requires authentication."""
-        from src.main import app
-
-        client = TestClient(app)
-        response = client.post("/insights/consent/revoke")
-
-        assert response.status_code == 403
-
-    def test_revoke_consent_returns_200(self, authenticated_client, mock_insights_service):
-        """Test that POST /insights/consent/revoke returns 200."""
-        mock_insights_service.revoke_consent.return_value = datetime.now(UTC)
-        response = authenticated_client.post("/insights/consent/revoke")
-
-        assert response.status_code == 200
-
-    def test_revoke_consent_returns_404_when_no_consent(
-        self, authenticated_client, mock_insights_service
-    ):
-        """Test returns 404 when no active consent to revoke."""
-        mock_insights_service.revoke_consent.return_value = None
-        response = authenticated_client.post("/insights/consent/revoke")
-
-        assert response.status_code == 404
 
 
 # =============================================================================
@@ -293,7 +153,6 @@ class TestGenerateEndpoint:
 
     def test_generate_returns_streaming_response(self, authenticated_client, mock_insights_service):
         """Test that endpoint returns streaming response."""
-        mock_insights_service.check_consent.return_value = (False, None, "1.0", False)
         response = authenticated_client.post(
             "/insights/generate",
             json={

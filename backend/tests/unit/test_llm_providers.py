@@ -24,7 +24,6 @@ class TestLLMProvider:
     def _mock_settings(self, **overrides):
         defaults = {
             "llm_model": "ollama/llama3.2",
-            "llm_api_key": None,
             "llm_api_base": None,
             "llm_fallback_model": None,
             "llm_request_timeout_seconds": 120,
@@ -138,11 +137,10 @@ class TestLLMProvider:
                 await complete(messages=[{"role": "user", "content": "Hello"}])
 
     @pytest.mark.asyncio
-    async def test_complete_passes_api_key_and_base(self):
-        """Test api_key and api_base are forwarded to litellm."""
+    async def test_complete_passes_api_base(self):
+        """Test api_base is forwarded to litellm (api_key is auto-read from env vars)."""
         mock_settings = self._mock_settings(
             llm_model="gpt-4o",
-            llm_api_key="sk-test",
             llm_api_base="https://custom.api.com",
         )
         mock_response = self._mock_litellm_response(model="gpt-4o")
@@ -155,7 +153,7 @@ class TestLLMProvider:
             await complete(messages=[{"role": "user", "content": "Hello"}])
 
         call_kwargs = mock_acomp.call_args[1]
-        assert call_kwargs["api_key"] == "sk-test"
+        assert "api_key" not in call_kwargs
         assert call_kwargs["api_base"] == "https://custom.api.com"
 
 
