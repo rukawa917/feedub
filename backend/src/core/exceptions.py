@@ -5,7 +5,6 @@ These exceptions provide domain-specific error handling throughout the applicati
 They can be caught by middleware and converted to appropriate HTTP responses.
 """
 
-from datetime import datetime
 
 
 class FeedubBaseException(Exception):
@@ -82,25 +81,6 @@ class InsightGenerationError(FeedubBaseException):
     def __init__(self, message: str = "Failed to generate insight") -> None:
         """Initialize insight generation error with 500 status."""
         super().__init__(message, status_code=500)
-
-
-class ConsentRequiredError(FeedubBaseException):
-    """Raised when user has not given consent for LLM processing."""
-
-    def __init__(
-        self,
-        message: str = "LLM consent required",
-        requires_reconsent: bool = False,
-    ) -> None:
-        """
-        Initialize consent required error with 403 status.
-
-        Args:
-            message: Error message.
-            requires_reconsent: Whether user needs to re-consent due to version change.
-        """
-        super().__init__(message, status_code=403)
-        self.requires_reconsent = requires_reconsent
 
 
 class MessageLimitExceededError(FeedubBaseException):

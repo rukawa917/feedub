@@ -23,7 +23,6 @@ from src.core.config import get_settings
 from src.core.database import close_db_connections, get_async_engine
 from src.core.exceptions import (
     AuthenticationError,
-    ConsentRequiredError,
     InsightGenerationError,
     MessageLimitExceededError,
     RateLimitError,
@@ -238,21 +237,6 @@ async def session_expired_error_handler(request: Request, exc: SessionExpiredErr
 
 
 # Insights exception handlers
-@app.exception_handler(ConsentRequiredError)
-async def consent_required_error_handler(
-    request: Request, exc: ConsentRequiredError
-) -> JSONResponse:
-    """Handle consent required errors with 403 response."""
-    return JSONResponse(
-        status_code=status.HTTP_403_FORBIDDEN,
-        content={
-            "error": "consent_required",
-            "detail": str(exc),
-            "requires_reconsent": exc.requires_reconsent,
-        },
-    )
-
-
 @app.exception_handler(MessageLimitExceededError)
 async def message_limit_error_handler(
     request: Request, exc: MessageLimitExceededError

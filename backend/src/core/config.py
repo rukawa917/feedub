@@ -123,26 +123,34 @@ class Settings(BaseSettings):
     )
 
     # LLM Configuration
+    # LiteLLM auto-reads provider-specific API keys from env vars.
+    # Set the env var for your provider — no single LLM_API_KEY needed.
+    #
+    # Provider          Env Var(s)                  Model Example
+    # ─────────────────────────────────────────────────────────────
+    # OpenAI            OPENAI_API_KEY              gpt-4o
+    # Anthropic         ANTHROPIC_API_KEY           claude-sonnet-4-20250514
+    # Google Gemini     GEMINI_API_KEY              gemini/gemini-2.5-pro
+    # Groq              GROQ_API_KEY                groq/llama-3.3-70b
+    # Mistral           MISTRAL_API_KEY             mistral/mistral-large-latest
+    # DeepSeek          DEEPSEEK_API_KEY            deepseek/deepseek-chat
+    # Zhipu AI (GLM)    ZHIPUAI_API_KEY             zhipuai/glm-4
+    # Alibaba (Qwen)    DASHSCOPE_API_KEY           dashscope/qwen-turbo
+    # Moonshot          MOONSHOT_API_KEY             moonshot/moonshot-v1-8k
+    # Ollama            (none)                      ollama/llama3.2
+    #
+    # Full provider list: https://docs.litellm.ai/docs/providers
     llm_model: str = Field(
         default="ollama/llama3.2",
-        description="LiteLLM model string (e.g. gpt-4o, claude-sonnet-4-20250514, ollama/llama3.2)",
-    )
-    llm_api_key: str | None = Field(
-        default=None,
-        description="LLM API key (not needed for Ollama)",
+        description="LiteLLM model string (e.g. gpt-4o, claude-sonnet-4-20250514, deepseek/deepseek-chat, ollama/llama3.2)",
     )
     llm_api_base: str | None = Field(
         default=None,
-        description="Custom LLM API base URL",
+        description="Custom LLM API base URL (useful for Ollama or self-hosted endpoints)",
     )
     llm_fallback_model: str | None = Field(
         default=None,
-        description="Fallback LLM model string",
-    )
-    llm_max_input_tokens: int = Field(
-        default=64_000,
-        gt=0,
-        description="Max input tokens for LLM context",
+        description="Fallback LLM model string (can be a different provider — each reads its own env var)",
     )
     llm_request_timeout_seconds: int = Field(
         default=120,
