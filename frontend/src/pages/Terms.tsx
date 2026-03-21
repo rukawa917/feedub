@@ -178,14 +178,13 @@ export default function Terms() {
                 <li>Store and process your message data according to your retention settings</li>
                 <li>
                   Send message content to your configured LLM provider when you request AI insights
-                  (only for channels with AI consent)
                 </li>
                 <li>Process your data as described in our Privacy Policy</li>
               </ul>
               <p className="text-sm text-muted-foreground leading-relaxed mt-4">
-                You retain full control over which channels are synced, AI consent settings, and
-                data retention periods. You can revoke these permissions at any time through your
-                account settings.
+                You retain full control over which channels are synced and data retention periods.
+                You can revoke these permissions at any time through your account settings. You are
+                responsible for any data privacy risks associated with using AI features.
               </p>
             </div>
           </section>

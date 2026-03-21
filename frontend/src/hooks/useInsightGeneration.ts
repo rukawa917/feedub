@@ -155,7 +155,6 @@ export function useInsightGeneration(): UseInsightGenerationReturn {
             error: apiError.data.error || 'generation_failed',
             detail: apiError.data.detail || 'Failed to generate insight',
             reset_at: apiError.data.reset_at,
-            requires_reconsent: apiError.data.requires_reconsent,
             suggested_filters: apiError.data.suggested_filters,
           })
         } else {

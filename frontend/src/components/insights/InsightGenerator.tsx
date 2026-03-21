@@ -1,18 +1,16 @@
 /**
  * InsightGenerator - Main LLM Insights generation orchestrator
- * Accepts message IDs directly and handles consent, usage, and streaming
+ * Accepts message IDs directly and handles usage and streaming
  */
 
 import { useState, useEffect, useCallback } from 'react'
-import { useInsightsConsent } from '../../hooks/useInsightsConsent'
 import { useInsightGeneration } from '../../hooks/useInsightGeneration'
 import { InsightStream } from './InsightStream'
-import { ConsentDialog } from './ConsentDialog'
 import { LanguageSelect } from './LanguageSelect'
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '../../types/insights'
 import type { GenerationRequest } from '../../types/insights'
 import { Button } from '@/components/ui/button'
-import { Wand2, Sparkles, MessageSquare } from 'lucide-react'
+import { Wand2, Sparkles, MessageSquare, AlertTriangle } from 'lucide-react'
 
 interface InsightGeneratorProps {
   messageIds: string[]
@@ -29,13 +27,8 @@ export function InsightGenerator({
   channelTitles,
   onGenerationComplete,
 }: InsightGeneratorProps) {
-  const { needsConsent, consentStatus, giveConsent } = useInsightsConsent()
   const generation = useInsightGeneration()
 
-  // Local state
-  const [showConsentDialog, setShowConsentDialog] = useState(false)
-  const [consentLoading, setConsentLoading] = useState(false)
-  const [isReConsent, setIsReConsent] = useState(false)
   const [language, setLanguage] = useState<SupportedLanguage>(() => {
     try {
       const stored = localStorage.getItem(LANGUAGE_STORAGE_KEY)
@@ -50,14 +43,6 @@ export function InsightGenerator({
 
   const canSubmit = messageIds.length > 0 && generation.status === 'idle'
 
-  // Handle re-consent requirement from SSE errors
-  useEffect(() => {
-    if (generation.error?.requires_reconsent) {
-      setIsReConsent(true)
-      setShowConsentDialog(true)
-    }
-  }, [generation.error?.requires_reconsent])
-
   // Persist language to localStorage
   useEffect(() => {
     try {
@@ -69,12 +54,6 @@ export function InsightGenerator({
 
   // Handle generate
   const handleGenerate = useCallback(async () => {
-    if (needsConsent) {
-      setIsReConsent(false)
-      setShowConsentDialog(true)
-      return
-    }
-
     const request: GenerationRequest = {
       message_ids: messageIds,
       language,
@@ -82,27 +61,7 @@ export function InsightGenerator({
 
     await generation.generate(request)
     onGenerationComplete?.()
-  }, [needsConsent, messageIds, language, generation, onGenerationComplete])
-
-  // Handle consent given
-  const handleConsent = useCallback(async () => {
-    setConsentLoading(true)
-    try {
-      await giveConsent()
-      setShowConsentDialog(false)
-      setIsReConsent(false)
-      // Proceed with generation after consent (initial or re-consent)
-      const request: GenerationRequest = {
-        message_ids: messageIds,
-        language,
-      }
-      generation.reset() // Clear error state before retrying
-      await generation.generate(request)
-      onGenerationComplete?.()
-    } finally {
-      setConsentLoading(false)
-    }
-  }, [giveConsent, messageIds, language, generation, onGenerationComplete])
+  }, [messageIds, language, generation, onGenerationComplete])
 
   // Handle "Generate Another" after completion
   const handleGenerateAnother = useCallback(() => {
@@ -144,6 +103,17 @@ export function InsightGenerator({
       ) : (
         /* Message Summary and Generation Form */
         <div className="space-y-6">
+          {/* Data Privacy Notice */}
+          <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/5 p-4">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="h-5 w-5 text-yellow-500 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-foreground-muted leading-relaxed">
+                By using AI Insights, your message data will be sent to the configured LLM provider
+                for analysis. You are responsible for any data privacy risks associated with this.
+              </p>
+            </div>
+          </div>
+
           {/* Message Summary Card */}
           <div className="rounded-xl border border-border bg-secondary/30 p-6">
             <div className="flex items-start gap-4">
@@ -193,25 +163,10 @@ export function InsightGenerator({
           )}
           {messageIds.length > 0 && (
             <p className="text-xs text-foreground-muted text-center">
-              💡 Want to change the selection? Go back to Dashboard and adjust your filters.
+              Want to change the selection? Go back to Dashboard and adjust your filters.
             </p>
           )}
         </div>
-      )}
-
-      {/* Consent Dialog */}
-      {showConsentDialog && consentStatus && (
-        <ConsentDialog
-          isOpen={showConsentDialog}
-          isReConsent={isReConsent}
-          currentVersion={consentStatus.current_version}
-          onConsent={handleConsent}
-          onDecline={() => {
-            setShowConsentDialog(false)
-            setIsReConsent(false)
-          }}
-          isLoading={consentLoading}
-        />
       )}
     </div>
   )

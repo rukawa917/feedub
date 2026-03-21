@@ -1,14 +1,14 @@
 /**
  * InsightOnboarding component
  *
- * First-time user experience before showing consent dialog.
- * Explains the value proposition of AI-powered insights.
+ * First-time user experience for AI-powered insights.
+ * Explains the value proposition and includes a data privacy disclaimer.
  */
 
-import { Sparkles, Check, ArrowRight } from 'lucide-react'
+import { Sparkles, Check, ArrowRight, AlertTriangle } from 'lucide-react'
 
 interface InsightOnboardingProps {
-  /** Callback to open consent dialog */
+  /** Callback to navigate to dashboard for message selection */
   onGetStarted: () => void
 }
 
@@ -67,11 +67,14 @@ export function InsightOnboarding({ onGetStarted }: InsightOnboardingProps) {
         <ArrowRight className="w-4 h-4 transition-transform duration-250 group-hover:translate-x-0.5" />
       </button>
 
-      {/* Privacy note */}
-      <p className="mt-6 text-xs text-foreground-muted max-w-sm opacity-75">
-        Your privacy matters. You'll be able to review and configure what data is shared in the next
-        step.
-      </p>
+      {/* Data privacy disclaimer */}
+      <div className="mt-6 flex items-start gap-2 max-w-sm text-left">
+        <AlertTriangle className="h-4 w-4 text-yellow-500 flex-shrink-0 mt-0.5" />
+        <p className="text-xs text-foreground-muted">
+          Message data will be sent to your configured LLM provider for analysis. You are
+          responsible for any data privacy risks associated with this.
+        </p>
+      </div>
     </div>
   )
 }

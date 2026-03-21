@@ -3,24 +3,6 @@
  * Types for consent management, usage tracking, SSE streaming, and insights
  */
 
-// Consent types
-export interface ConsentStatus {
-  has_consent: boolean
-  consent_version: string | null
-  current_version: string
-  requires_re_consent: boolean
-}
-
-export interface ConsentResponse {
-  success: boolean
-  consent_version: string
-}
-
-export interface RevokeConsentResponse {
-  success: boolean
-  revoked_at: string
-}
-
 // Validation types
 // NOTE: chat_ids are strings (matching backend schema), dates are REQUIRED
 export interface ValidationRequest {
@@ -93,7 +75,6 @@ export interface SSEErrorEvent {
   error: string
   detail: string
   reset_at?: string
-  requires_reconsent?: boolean
   suggested_filters?: ValidationResponse['suggested_filters']
 }
 
@@ -148,7 +129,6 @@ export interface InsightListResponse {
 
 // Error types
 export type InsightErrorCode =
-  | 'consent_required'
   | 'rate_limit_exceeded'
   | 'message_limit_exceeded'
   | 'generation_failed'

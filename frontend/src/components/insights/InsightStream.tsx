@@ -237,11 +237,9 @@ export function InsightStream({
             <p className="text-sm text-foreground font-medium mb-1">
               {error?.error === 'rate_limit_exceeded'
                 ? 'Daily Limit Reached'
-                : error?.error === 'consent_required'
-                  ? 'Consent Required'
-                  : error?.error === 'message_limit_exceeded'
-                    ? 'Too Many Messages'
-                    : 'Generation Failed'}
+                : error?.error === 'message_limit_exceeded'
+                  ? 'Too Many Messages'
+                  : 'Generation Failed'}
             </p>
             <p className="text-sm text-foreground-muted leading-relaxed">
               {error?.detail ||

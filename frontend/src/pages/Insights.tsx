@@ -3,51 +3,28 @@
  *
  * Features:
  * - Two-tab interface: Generate New / History
- * - Usage quota indicator in header
- * - Consent flow for first-time users
- * - Rate limiting banner when quota exhausted
  * - Paginated insight history
  * - Navigation to detail view
  *
  * States:
- * 1. First visit (no consent): Show onboarding
- * 2. Has consent, Generate tab: Show generator form
- * 3. Has consent, History tab: Show insight list or empty state
- * 4. Quota exhausted: Show rate limit banner instead of form
+ * 1. Generate tab with messages: Show generator form
+ * 2. Generate tab without messages: Show onboarding or "no messages" state
+ * 3. History tab: Show insight list or empty state
  */
 
 import { useState, useCallback, useEffect } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
-import { ArrowLeft, Sparkles, History as HistoryIcon, Settings } from 'lucide-react'
+import { ArrowLeft, Sparkles, History as HistoryIcon } from 'lucide-react'
 import { FeedubIcon } from '../components/common/FeedubIcon'
 import { ThemeToggle } from '../components/common/ThemeToggle'
 import { LogoutButton } from '../components/auth/LogoutButton'
-import { ConsentDialog } from '../components/insights/ConsentDialog'
 import { InsightOnboarding } from '../components/insights/InsightOnboarding'
 import { InsightGenerator } from '../components/insights/InsightGenerator'
 import { InsightCard, InsightHistoryEmpty } from '../components/insights/InsightCard'
 import { InsightDetail } from '../components/insights/InsightDetail'
 import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
-import { useInsightsConsent } from '../hooks/useInsightsConsent'
 import { useInsightHistory } from '../hooks/useInsightHistory'
 import { useAuthStore } from '../stores/auth'
-import { useToast } from '../contexts/ToastContext'
 import { getInsightDetail } from '../services/insights-service'
 import type { InsightDetail as InsightDetailType } from '../types/insights'
 import type { InsightsLocationState } from '../types/filters'
@@ -63,17 +40,8 @@ export function Insights() {
   const hasMessageIds = locationState?.messageIds && locationState.messageIds.length > 0
   const user = useAuthStore((state) => state.user)
   const token = useAuthStore((state) => state.token)
-  const { showToast } = useToast()
 
   // Hooks
-  const {
-    consentStatus,
-    isLoading: isLoadingConsent,
-    needsConsent,
-    giveConsent,
-    revokeConsent,
-  } = useInsightsConsent()
-
   const {
     insights,
     total: totalInsights,
@@ -127,10 +95,6 @@ export function Insights() {
     setActiveTabState(tab)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [])
-  const [showConsentDialog, setShowConsentDialog] = useState(false)
-  const [isConsentLoading, setIsConsentLoading] = useState(false)
-  const [showRevokeDialog, setShowRevokeDialog] = useState(false)
-  const [isRevokeLoading, setIsRevokeLoading] = useState(false)
 
   // Handle navigation
   const handleBackToDashboard = useCallback(() => {
@@ -148,57 +112,18 @@ export function Insights() {
     [navigate]
   )
 
-  // Handle onboarding "Get Started" click
-  const handleGetStarted = useCallback(() => {
-    setShowConsentDialog(true)
-  }, [])
-
-  // Handle consent given
-  const handleConsent = useCallback(async () => {
-    setIsConsentLoading(true)
-    try {
-      await giveConsent()
-      setShowConsentDialog(false)
-    } catch (err) {
-      console.error('Failed to give consent:', err)
-    } finally {
-      setIsConsentLoading(false)
-    }
-  }, [giveConsent])
-
-  // Handle consent declined
-  const handleDeclineConsent = useCallback(() => {
-    setShowConsentDialog(false)
-  }, [])
-
-  // Handle revoke consent
-  const handleRevokeConsent = useCallback(async () => {
-    setIsRevokeLoading(true)
-    try {
-      await revokeConsent()
-      setShowRevokeDialog(false)
-      refetchHistory()
-      showToast('Consent revoked. All insights have been deleted.', { variant: 'success' })
-    } catch (err) {
-      console.error('Failed to revoke consent:', err)
-      showToast('Failed to revoke consent. Please try again.', { variant: 'error' })
-    } finally {
-      setIsRevokeLoading(false)
-    }
-  }, [revokeConsent, refetchHistory, showToast])
-
   // Handle "Generate First Insight" from empty history
   const handleGenerateFirst = useCallback(() => {
     setActiveTab('generate')
   }, [setActiveTab])
 
-  // After generation completes, refresh history and optionally switch tab
+  // After generation completes, refresh history
   const handleGenerationComplete = useCallback(() => {
     refetchHistory()
   }, [refetchHistory])
 
-  // Determine if onboarding should be shown
-  const showOnboarding = needsConsent && activeTab === 'generate' && !isLoadingConsent
+  // Show onboarding when no messages selected
+  const showOnboarding = !hasMessageIds && activeTab === 'generate'
 
   // If viewing a specific insight detail, render the detail view
   if (insightId) {
@@ -232,25 +157,6 @@ export function Insights() {
 
             {/* Actions */}
             <div className="flex items-center gap-2">
-              {/* Settings dropdown - only show if user has consent */}
-              {!needsConsent && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="Settings">
-                      <Settings className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem
-                      onClick={() => setShowRevokeDialog(true)}
-                      className="text-destructive focus:text-destructive"
-                    >
-                      Revoke Consent
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-
               {/* Theme toggle */}
               <ThemeToggle iconOnly />
 
@@ -317,11 +223,10 @@ export function Insights() {
             {/* Generate Tab */}
             {activeTab === 'generate' && (
               <>
-                {/* Onboarding - First-time users */}
                 {showOnboarding ? (
-                  <InsightOnboarding onGetStarted={handleGetStarted} />
+                  <InsightOnboarding onGetStarted={handleBackToDashboard} />
                 ) : hasMessageIds ? (
-                  /* Generator form - Normal state */
+                  /* Generator form */
                   <InsightGenerator
                     messageIds={locationState!.messageIds}
                     dateRange={locationState!.dateRange}
@@ -396,42 +301,6 @@ export function Insights() {
           </div>
         </div>
       </main>
-
-      {/* Consent Dialog */}
-      {showConsentDialog && consentStatus && (
-        <ConsentDialog
-          isOpen={showConsentDialog}
-          isReConsent={consentStatus.requires_re_consent}
-          currentVersion={consentStatus.current_version}
-          onConsent={handleConsent}
-          onDecline={handleDeclineConsent}
-          isLoading={isConsentLoading}
-        />
-      )}
-
-      {/* Revoke Consent Alert Dialog */}
-      <AlertDialog open={showRevokeDialog} onOpenChange={setShowRevokeDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Revoke Consent?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete all your generated insights and prevent future AI
-              analysis of your feedback data. You can re-enable insights at any time, but previous
-              insights cannot be recovered.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isRevokeLoading}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleRevokeConsent}
-              disabled={isRevokeLoading}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {isRevokeLoading ? 'Revoking...' : 'Revoke Consent'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   )
 }

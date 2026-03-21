@@ -6,9 +6,6 @@
 import { API_ENDPOINTS } from './api/config'
 import { apiClient } from './api/client'
 import type {
-  ConsentStatus,
-  ConsentResponse,
-  RevokeConsentResponse,
   ValidationRequest,
   ValidationResponse,
   SSEEvent,
@@ -46,27 +43,6 @@ function createSSEParser(onEvent: (event: SSEEvent) => void) {
       }
     }
   }
-}
-
-/**
- * Get consent status for current user
- */
-export async function getConsentStatus(): Promise<ConsentStatus> {
-  return apiClient.get<ConsentStatus>(API_ENDPOINTS.insights.consentStatus)
-}
-
-/**
- * Give consent for LLM insights
- */
-export async function giveConsent(version: string): Promise<ConsentResponse> {
-  return apiClient.post<ConsentResponse>(API_ENDPOINTS.insights.giveConsent, { version })
-}
-
-/**
- * Revoke consent for LLM insights
- */
-export async function revokeConsent(): Promise<RevokeConsentResponse> {
-  return apiClient.post<RevokeConsentResponse>(API_ENDPOINTS.insights.revokeConsent)
 }
 
 /**

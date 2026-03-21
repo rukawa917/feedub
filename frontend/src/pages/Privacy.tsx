@@ -111,7 +111,6 @@ export default function Privacy() {
                 <h4 className="font-medium text-foreground mb-2 text-sm">Usage Data</h4>
                 <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground leading-relaxed">
                   <li>Channel selection preferences</li>
-                  <li>AI consent preferences (per-channel)</li>
                   <li>Data retention settings</li>
                 </ul>
               </div>
@@ -188,8 +187,8 @@ export default function Privacy() {
               <p className="text-sm text-muted-foreground leading-relaxed">
                 When you use the Insights feature, message content from your selected channels is
                 sent to your configured LLM provider for analysis. This processing occurs only when
-                you explicitly request it and only for channels where you have granted AI consent.
-                You can revoke AI consent for any channel at any time through your channel settings.
+                you explicitly request it. You are responsible for any data privacy risks associated
+                with sending your data to the configured LLM provider.
               </p>
             </div>
           </section>
@@ -227,10 +226,6 @@ export default function Privacy() {
               <li>
                 <strong className="text-foreground">Delete:</strong> Remove specific messages,
                 channels, or your entire account
-              </li>
-              <li>
-                <strong className="text-foreground">Control AI Processing:</strong> Grant or revoke
-                AI consent for any channel
               </li>
               <li>
                 <strong className="text-foreground">Configure Retention:</strong> Set custom

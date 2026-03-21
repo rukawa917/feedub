@@ -59,9 +59,6 @@ export const API_ENDPOINTS = {
 
   // Insights
   insights: {
-    consentStatus: '/insights/consent/status',
-    giveConsent: '/insights/consent/give',
-    revokeConsent: '/insights/consent/revoke',
     validate: '/insights/validate',
     generate: '/insights/generate',
     generateFromIds: '/insights/generate-from-ids',
