@@ -8,7 +8,14 @@ import signal
 import typer
 
 from feedub.constants import BACKEND_PORT, DATA_DIR, FRONTEND_PORT, PID_DIR
-from feedub.utils import console, is_process_alive, kill_port, read_pid, success, warning
+from feedub.utils import (
+    console,
+    is_process_alive,
+    kill_port,
+    read_pid,
+    success,
+    warning,
+)
 
 
 def stop_cmd(remove_data: bool = False) -> None:
@@ -46,7 +53,9 @@ def stop_cmd(remove_data: bool = False) -> None:
             "[bold yellow]WARNING:[/bold yellow] This will permanently delete all feedub data "
             "including your Telegram session and message history."
         )
-        confirmed = typer.confirm("Are you sure you want to remove all data?", default=False)
+        confirmed = typer.confirm(
+            "Are you sure you want to remove all data?", default=False
+        )
         if not confirmed:
             console.print("Aborted.")
             return

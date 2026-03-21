@@ -48,7 +48,9 @@ def run_cmd(no_open: bool = False) -> None:
     """Start all feedub services."""
     # 1. Check config exists
     if not CONFIG_FILE.exists():
-        error("No configuration found. Run [bold]feedub init[/bold] first to set up feedub.")
+        error(
+            "No configuration found. Run [bold]feedub init[/bold] first to set up feedub."
+        )
         raise SystemExit(1)
 
     # 2. Resolve source directories
@@ -147,7 +149,16 @@ def run_cmd(no_open: bool = False) -> None:
     console.print("[dim]Starting backend...[/dim]")
     backend_log = open(LOG_DIR / "backend.log", "a")
     backend_proc = subprocess.Popen(
-        ["uv", "run", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", str(BACKEND_PORT)],
+        [
+            "uv",
+            "run",
+            "uvicorn",
+            "src.main:app",
+            "--host",
+            "0.0.0.0",
+            "--port",
+            str(BACKEND_PORT),
+        ],
         cwd=backend_dir,
         stdout=backend_log,
         stderr=backend_log,

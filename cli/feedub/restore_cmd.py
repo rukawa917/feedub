@@ -13,7 +13,9 @@ from feedub.utils import console, error, is_process_alive, read_pid, success, wa
 
 def restore(
     file: str = typer.Argument(None, help="Path to the backup .db file to restore"),
-    list_backups: bool = typer.Option(False, "--list", "-l", help="List available backups"),
+    list_backups: bool = typer.Option(
+        False, "--list", "-l", help="List available backups"
+    ),
 ) -> None:
     """Restore the Feedub database from a backup file."""
 
@@ -83,7 +85,9 @@ def _list_backups() -> None:
         console.print(f"[dim]No backups found in {BACKUP_DIR}[/dim]")
         return
 
-    backups = sorted(backup_dir.glob("*.db"), key=lambda p: p.stat().st_mtime, reverse=True)
+    backups = sorted(
+        backup_dir.glob("*.db"), key=lambda p: p.stat().st_mtime, reverse=True
+    )
 
     if not backups:
         console.print(f"[dim]No backups found in {BACKUP_DIR}[/dim]")
