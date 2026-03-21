@@ -25,7 +25,7 @@ from feedub.utils import (
 
 
 BACKEND_HEALTH_URL = f"http://localhost:{BACKEND_PORT}/health/live"
-FRONTEND_URL = f"http://localhost:5173"
+FRONTEND_URL = "http://localhost:5173"
 HEALTH_POLL_INTERVAL = 3  # seconds
 HEALTH_TIMEOUT = 120  # seconds
 
