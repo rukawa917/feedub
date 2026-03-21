@@ -164,7 +164,6 @@ export function Insights() {
               <LogoutButton iconOnly />
             </div>
           </div>
-
         </div>
       </header>
 

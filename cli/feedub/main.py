@@ -84,9 +84,7 @@ def logs(
 
 @app.command("uninstall")
 def uninstall(
-    keep_data: bool = typer.Option(
-        False, "--keep-data", help="Keep ~/.feedub/ data directory."
-    ),
+    keep_data: bool = typer.Option(False, "--keep-data", help="Keep ~/.feedub/ data directory."),
     force: bool = typer.Option(False, "--force", help="Skip confirmation prompt."),
 ) -> None:
     """Complete removal of Feedub."""
@@ -97,9 +95,7 @@ def uninstall(
 
 @app.command("upgrade")
 def upgrade(
-    check: bool = typer.Option(
-        False, "--check", help="Check for updates without applying them."
-    ),
+    check: bool = typer.Option(False, "--check", help="Check for updates without applying them."),
 ) -> None:
     """Upgrade feedub to the latest version."""
     from feedub.upgrade_cmd import upgrade as _upgrade
@@ -109,9 +105,7 @@ def upgrade(
 
 @app.command("backup")
 def backup(
-    output: str = typer.Option(
-        None, "--output", "-o", help="Custom output path for backup file."
-    ),
+    output: str = typer.Option(None, "--output", "-o", help="Custom output path for backup file."),
 ) -> None:
     """Export database to ~/.feedub/backups/."""
     from feedub.backup_cmd import backup as _backup
@@ -122,9 +116,7 @@ def backup(
 @app.command("restore")
 def restore(
     file: str = typer.Argument(None, help="Backup file to restore (.db)"),
-    list_backups: bool = typer.Option(
-        False, "--list", "-l", help="List available backups."
-    ),
+    list_backups: bool = typer.Option(False, "--list", "-l", help="List available backups."),
 ) -> None:
     """Restore from backup."""
     from feedub.restore_cmd import restore as _restore

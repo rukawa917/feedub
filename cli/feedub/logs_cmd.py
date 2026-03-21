@@ -12,17 +12,14 @@ from feedub.utils import error
 VALID_SERVICES = ("backend", "frontend")
 
 
-def logs_cmd(
-    service: str | None = None, tail: int = 100, no_follow: bool = False
-) -> None:
+def logs_cmd(service: str | None = None, tail: int = 100, no_follow: bool = False) -> None:
     """Stream logs from feedub services.
 
     Optionally specify a service name: backend, frontend.
     """
     if service and service not in VALID_SERVICES:
         error(
-            f"Unknown service: [bold]{service}[/bold]. "
-            f"Valid services: {', '.join(VALID_SERVICES)}"
+            f"Unknown service: [bold]{service}[/bold]. Valid services: {', '.join(VALID_SERVICES)}"
         )
         raise SystemExit(1)
 

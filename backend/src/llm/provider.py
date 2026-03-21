@@ -46,10 +46,10 @@ async def _call_litellm(
             ),
             timeout=timeout_seconds + 10,  # asyncio hard cap slightly beyond litellm's
         )
-    except asyncio.TimeoutError:
+    except TimeoutError as err:
         raise TimeoutError(
             f"LLM request timed out after {timeout_seconds}s (model={model})"
-        )
+        ) from err
     return LLMResponse(
         content=response.choices[0].message.content,
         model=response.model,

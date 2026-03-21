@@ -254,6 +254,7 @@ class UserRepository:
         from src.models.message_fetch import MessageFetch
         from src.models.user_channel_favorite import UserChannelFavorite
         from src.models.user_channel_selection import UserChannelSelection
+
         total_deleted = 0
 
         # Delete messages

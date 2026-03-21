@@ -10,7 +10,6 @@ import litellm
 from src.core.config import get_settings
 from src.core.exceptions import (
     InsightGenerationError,
-    MessageLimitExceededError,
 )
 from src.llm.prompts import format_messages_for_llm, get_insights_system_prompt
 from src.llm.provider import complete as llm_complete
@@ -154,9 +153,7 @@ class InsightsService:
                 {"role": "user", "content": user_content},
             ]
 
-            token_count = litellm.token_counter(
-                model=settings.llm_model, messages=llm_messages
-            )
+            token_count = litellm.token_counter(model=settings.llm_model, messages=llm_messages)
             logger.info(
                 f"{log_prefix}: estimated {token_count} input tokens "
                 f"(limit {max_input}, model max {model_max_input}) "
@@ -170,12 +167,9 @@ class InsightsService:
                 messages = messages[drop:]
                 user_content = format_messages_for_llm(messages)
                 llm_messages[1]["content"] = user_content
-                token_count = litellm.token_counter(
-                    model=settings.llm_model, messages=llm_messages
-                )
+                token_count = litellm.token_counter(model=settings.llm_model, messages=llm_messages)
                 logger.info(
-                    f"{log_prefix}: truncated to {len(messages)} messages, "
-                    f"{token_count} tokens"
+                    f"{log_prefix}: truncated to {len(messages)} messages, {token_count} tokens"
                 )
 
             if token_count > max_input:

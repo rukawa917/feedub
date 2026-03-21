@@ -191,7 +191,6 @@ class TestGenerateInsight:
     async def test_raises_error_when_no_messages_found(
         self, insights_service, mock_insights_repo, mock_message_repo, user_id
     ):
-
         mock_message_repo.get_messages_for_insights.return_value = []
         with pytest.raises(InsightGenerationError, match="No messages found"):
             await insights_service.generate_insight(
@@ -205,7 +204,6 @@ class TestGenerateInsight:
     async def test_creates_insight_and_calls_llm(
         self, insights_service, mock_insights_repo, mock_message_repo, user_id
     ):
-
         messages = _make_messages(100)
         mock_message_repo.get_messages_for_insights.return_value = messages
 
@@ -261,7 +259,6 @@ class TestGenerateInsight:
     async def test_marks_insight_failed_on_error(
         self, insights_service, mock_insights_repo, mock_message_repo, user_id
     ):
-
         messages = _make_messages(100)
         mock_message_repo.get_messages_for_insights.return_value = messages
 
@@ -320,6 +317,8 @@ class TestGetInsight:
 
 
 class TestListInsights:
-    async def test_lists_insights_with_pagination(self, insights_service, mock_insights_repo, user_id):
+    async def test_lists_insights_with_pagination(
+        self, insights_service, mock_insights_repo, user_id
+    ):
         await insights_service.list_insights(user_id, limit=10, offset=0)
         mock_insights_repo.list_insights.assert_called_once_with(user_id, 10, 0)

@@ -17,8 +17,7 @@ interface LivenessResponse {
 export function useLlmEnabled(): boolean {
   const { data } = useQuery({
     queryKey: ['health', 'live'],
-    queryFn: () =>
-      apiClient.get<LivenessResponse>(API_ENDPOINTS.healthLive, { skipAuth: true }),
+    queryFn: () => apiClient.get<LivenessResponse>(API_ENDPOINTS.healthLive, { skipAuth: true }),
     staleTime: Infinity,
     retry: false,
   })

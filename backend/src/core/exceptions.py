@@ -6,7 +6,6 @@ They can be caught by middleware and converted to appropriate HTTP responses.
 """
 
 
-
 class FeedubBaseException(Exception):
     """Base exception for all application-specific errors."""
 

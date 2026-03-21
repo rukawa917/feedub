@@ -48,9 +48,7 @@ def run_cmd(no_open: bool = False) -> None:
     """Start all feedub services."""
     # 1. Check config exists
     if not CONFIG_FILE.exists():
-        error(
-            "No configuration found. Run [bold]feedub init[/bold] first to set up feedub."
-        )
+        error("No configuration found. Run [bold]feedub init[/bold] first to set up feedub.")
         raise SystemExit(1)
 
     # 2. Resolve source directories

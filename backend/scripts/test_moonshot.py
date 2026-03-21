@@ -10,8 +10,8 @@ Tests:
 """
 
 import asyncio
-import time
 import os
+import time
 
 import litellm
 
@@ -48,7 +48,10 @@ async def test_large_request():
     """Test 2: Large request (~200K tokens) — tests if API hangs on big payloads."""
     # Generate ~200K tokens of content (each Korean char ≈ 2-3 tokens)
     # Use repetitive text to simulate real message data
-    filler = "비트코인 가격이 급등했습니다. 시장 분석가들은 이번 상승세가 지속될 것으로 예상합니다. " * 5000
+    filler = (
+        "비트코인 가격이 급등했습니다. 시장 분석가들은 이번 상승세가 지속될 것으로 예상합니다. "
+        * 5000
+    )
     token_est = litellm.token_counter(
         model=MODEL,
         messages=[
@@ -74,7 +77,7 @@ async def test_large_request():
         elapsed = time.time() - start
         print(f"  OK in {elapsed:.1f}s: {resp.choices[0].message.content[:100]}")
         print(f"  Tokens: {resp.usage.prompt_tokens} in / {resp.usage.completion_tokens} out")
-    except asyncio.TimeoutError:
+    except TimeoutError:
         elapsed = time.time() - start
         print(f"  TIMEOUT after {elapsed:.1f}s — API hung without responding")
     except Exception as e:
@@ -85,7 +88,10 @@ async def test_large_request():
 async def test_over_limit_request():
     """Test 3: Request exceeding 262K context — tests if API returns error or hangs."""
     # Generate ~300K tokens
-    filler = "비트코인 가격이 급등했습니다. 시장 분석가들은 이번 상승세가 지속될 것으로 예상합니다. " * 8000
+    filler = (
+        "비트코인 가격이 급등했습니다. 시장 분석가들은 이번 상승세가 지속될 것으로 예상합니다. "
+        * 8000
+    )
     token_est = litellm.token_counter(
         model=MODEL,
         messages=[
@@ -110,7 +116,7 @@ async def test_over_limit_request():
         )
         elapsed = time.time() - start
         print(f"  UNEXPECTED OK in {elapsed:.1f}s: {resp.choices[0].message.content[:100]}")
-    except asyncio.TimeoutError:
+    except TimeoutError:
         elapsed = time.time() - start
         print(f"  TIMEOUT after {elapsed:.1f}s — API hung instead of returning error")
     except Exception as e:
@@ -122,10 +128,10 @@ async def test_over_limit_request():
 async def test_litellm_timeout_behavior():
     """Test 4: Does litellm's timeout= param actually work for Moonshot?"""
     filler = "Test message. " * 500
-    print(f"\n[Test 4] litellm timeout=5s (should timeout quickly)...")
+    print("\n[Test 4] litellm timeout=5s (should timeout quickly)...")
     start = time.time()
     try:
-        resp = await litellm.acompletion(
+        await litellm.acompletion(
             model=MODEL,
             messages=[
                 {"role": "system", "content": "Write a 2000-word essay about AI."},
@@ -140,9 +146,11 @@ async def test_litellm_timeout_behavior():
         elapsed = time.time() - start
         print(f"  Error after {elapsed:.1f}s: {type(e).__name__}: {str(e)[:150]}")
         if elapsed > 10:
-            print(f"  WARNING: Took {elapsed:.1f}s despite timeout=5s — litellm timeout is NOT reliable for this provider")
+            print(
+                f"  WARNING: Took {elapsed:.1f}s despite timeout=5s — litellm timeout is NOT reliable for this provider"
+            )
         else:
-            print(f"  OK: Timeout enforced correctly")
+            print("  OK: Timeout enforced correctly")
 
 
 async def main():
